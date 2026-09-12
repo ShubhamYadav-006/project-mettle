@@ -1,169 +1,46 @@
-# METTLE — Hackathon Rules & Compliance
+# ⚖️ METTLE — Architectural Rules, Compliance & Standards
+
+> **Project:** Mettle  
+> **Repository:** `https://github.com/ShubhamYadav-006/project-mettle.git`  
+> **Stack:** PostgreSQL (Neon) + Express.js + React 18 + Tailwind CSS + Vite
 
 ---
 
-# 1. Hackathon Rules
+## 1. Project Requirements & Architecture
 
-- Follow all official Tech Zephyr 4.0 Web Hackathon rules.
-- Project must be developed during the hackathon.
-- No plagiarism or copied projects.
-- No outsourcing or external development help.
-- AI tools are allowed but must be disclosed.
-- Third-party libraries, APIs, frameworks, templates, and boilerplates must be disclosed where required.
-
----
-
-# 2. Project Requirements
-
-Mettle must have:
-
-- Secure user authentication
-- User-specific data isolation
-- PostgreSQL database
-- Backend API
-- Quest/Task CRUD
-- Quest completion system
-- XP system
-- Non-linear leveling
-- Character attributes
-- Streaks
-- Rewards/economy
-- Responsive UI
-- Accessible UI
-- Persistent database storage
+Mettle strictly complies with the following architecture:
+- **Backend Authority**: Backend is the sole authority for game logic, XP math, streak calculations, and currency balances. The frontend never dictates or submits computed reward values.
+- **Database Persistence**: PostgreSQL is the single source of truth; all progression, stats, inventory, and streaks persist across sessions and page refreshes.
+- **Data Isolation**: Strict user-level authorization ensures users can only access and modify their own quests and records.
+- **Atomic Concurrency**: Quest completion and item purchases execute in database transactions with row-level locks to prevent double-spending or duplicate completions.
 
 ---
 
-# 3. Security Rules
+## 2. Security & Anti-Cheat Standards
 
-- Backend is the authority for game data.
-- Never trust frontend values for:
-  - XP
-  - Gold
-  - Level
-  - Attributes
-  - Streaks
-  - Inventory
-- Users can access only their own data.
-- Authentication must be secure.
-- JWT must use HTTP-only cookies.
-- Validate and sanitize API inputs.
+- **Password Security**: Bcrypt with salted rounds; plain-text passwords are never stored.
+- **JWT Authentication**: Token-based authentication verifying user identity on every protected endpoint.
+- **SQL Injection Prevention**: 100% of SQL queries utilize parameterized placeholders (`$1`, `$2`, etc.).
+- **IDOR Protection**: All task mutations (`GET`, `PUT`, `DELETE`, `POST /complete`) strictly query with `WHERE id = $1 AND user_id = $2`.
 
 ---
 
-# 4. Database Rules
+## 3. UI/UX & Design Guidelines
 
-- PostgreSQL is the source of truth.
-- Do not use localStorage as the main database.
-- Important actions must persist after refresh/login.
-- Maintain proper relational structure.
-- Store historical completion/progression data where required.
-
----
-
-# 5. Git Rules
-
-- Maintain clean chronological commits.
-- Minimum required chronological commits must be satisfied.
-- Do not create fake commit history.
-- Commits must begin after the officially announced hackathon start.
-- GitHub repository must be public for submission.
+- **Monochrome + Electric Lime Theme**: Clean, high-contrast, distraction-free aesthetic (`#B5E34A`).
+- **Wireframe Header**:
+  ```text
+  Mettle  │  Level 3 Shubham  │  🔥 1 day  │  🪙 40  │  ☾ / ☼  │  ⋮
+  ```
+- **High-Density Compact Cards**: Quick-action quest completion with zero unnecessary fluff.
+- **Accessible & Responsive**: Fully responsive across mobile, tablet, and desktop with keyboard accessibility and high-contrast compliance (WCAG 2.1 AA).
 
 ---
 
-# 6. UI/UX Rules
+## 4. Submission & Repository Checklist
 
-- Mettle must feel like a game, not a generic SaaS dashboard.
-- Maintain one consistent visual theme.
-- Use meaningful animations and micro-interactions.
-- Avoid unnecessary UI complexity.
-- Support mobile, tablet, and desktop.
-- Support keyboard navigation.
-- Use semantic HTML and accessible labels.
-
----
-
-# 7. Submission Requirements
-
-Final submission must include:
-
-- Working project
-- Public GitHub repository
-- Clean README
-- Setup instructions
-- `.env.example`
-- Live deployed URL
-- Required demonstration video
-
----
-
-# 8. Demo Video
-
-Video must:
-
-- Be under 100 MB.
-- Be 90–180 seconds.
-- Show signup/login.
-- Show adding a quest.
-- Show completing a quest.
-- Show XP/progression or level-up.
-- Refresh the application.
-- Demonstrate that data persists in the database.
-
----
-
-# 9. Disqualification Risks
-
-Avoid:
-
-- Broken deployment
-- Private/inaccessible repository
-- Fake data persistence
-- localStorage-only implementation
-- Missing backend
-- Database failure
-- Runtime/console crashes
-- Copied projects
-- Missing required video
-- Restricted or invalid submission links
-- Unethical or prohibited behavior
-
----
-
-# 10. Development Priority
-
-### P0 — Mandatory
-
-Build and stabilize all official requirements first.
-
-### P1 — Important
-
-Add polish such as:
-
-- Inventory
-- Badges
-- Statistics
-- Advanced animations
-- Loading states
-- Optimistic UI
-
-### P2 — Optional
-
-Add creative WOW features only after P0 is completely stable.
-
----
-
-# 11. Core Principle
-
-> **Build a functional, secure, persistent, polished Life RPG first.**  
-> **Fancy features must never compromise the mandatory requirements.**
-
----
-
-# 12. Final Test
-
-Before submission, verify:
-
-```text
-Signup → Login → Add Quest → Complete Quest → Earn XP → Level Up → Refresh → Data Persists
-```
+- [x] Clean Git commit history on `main` branch.
+- [x] Root `.gitignore` excluding `.env` files and `node_modules`.
+- [x] Backend `.env.example` documentation with configuration placeholders.
+- [x] Automated test suites covering RPG math, security, and full-stack persistence.
+- [x] Code pushed to GitHub: `https://github.com/ShubhamYadav-006/project-mettle.git`.

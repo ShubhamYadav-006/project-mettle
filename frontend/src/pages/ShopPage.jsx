@@ -21,10 +21,10 @@ const ICON_MAP = {
 };
 
 export default function ShopPage() {
-  const { character, updateCharacterState, setActiveTheme } = useAuth();
-  const [activeTab, setActiveTab] = useState('catalog'); // 'catalog' | 'inventory'
+  const { user, character, updateCharacterState, setActiveTheme } = useAuth();
   const [items, setItems] = useState([]);
   const [inventory, setInventory] = useState([]);
+  const [activeTab, setActiveTab] = useState('catalog'); // 'catalog' | 'inventory'
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(null);
   const [equipping, setEquipping] = useState(null);
@@ -34,6 +34,7 @@ export default function ShopPage() {
   const freezeCount = character?.streaks?.freeze_count ?? character?.streaks?.freezeCount ?? 0;
 
   const fetchData = async () => {
+    if (!user) return;
     try {
       setLoading(true);
       const [catRes, invRes] = await Promise.all([
@@ -52,15 +53,21 @@ export default function ShopPage() {
         }
       }
     } catch (err) {
-      console.error(err);
+      const isAuthErr =
+        err?.message?.includes('Access denied') ||
+        err?.message?.includes('expired') ||
+        err?.message?.includes('token');
+      if (user && !isAuthErr) console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (user) {
+      fetchData();
+    }
+  }, [user]);
 
   const handleBuy = async (itemId, cost) => {
     if (gold < cost) {

@@ -79,18 +79,18 @@ export default function QuestModal({ isOpen, onClose, onSubmit, initialData = nu
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm select-none">
-      <div className="relative w-full max-w-lg rounded-md mettle-panel p-6 border border-[var(--border-strong)] bg-[var(--bg-surface)] text-[var(--text-primary)]">
+      <div className="relative w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-md mettle-panel p-5 sm:p-6 border border-[var(--border-strong)] bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-xl">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 rounded-sm text-[var(--text-muted)] hover:text-white hover:bg-[var(--bg-elevated)] transition-all"
+          className="absolute top-4 right-4 p-1.5 rounded-sm text-[var(--text-muted)] hover:text-white hover:bg-[var(--bg-elevated)] transition-all cursor-pointer"
           aria-label="Close"
         >
           <X className="h-4 w-4" />
         </button>
 
         {/* Title */}
-        <div className="mb-5">
+        <div className="mb-4">
           <span className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-muted)] font-sans">
             Task Configuration
           </span>
@@ -136,7 +136,7 @@ export default function QuestModal({ isOpen, onClose, onSubmit, initialData = nu
           </div>
 
           {/* Category & Attribute Selection */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-1 font-sans">
                 Category
@@ -175,15 +175,15 @@ export default function QuestModal({ isOpen, onClose, onSubmit, initialData = nu
             <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-1 font-sans">
               Priority / Effort Tier
             </label>
-            <div className="grid grid-cols-5 gap-1.5">
+            <div className="grid grid-cols-5 gap-1 sm:gap-1.5">
               {DIFFICULTIES.map((d) => (
                 <button
                   type="button"
                   key={d.id}
                   onClick={() => setDifficulty(d.id)}
-                  className={`py-1.5 px-1 rounded-sm text-xs font-sans font-semibold border transition-all text-center ${
+                  className={`py-1.5 px-0.5 sm:px-1 rounded-sm text-[10px] sm:text-xs font-sans font-semibold border transition-all text-center cursor-pointer ${
                     difficulty === d.id
-                      ? 'bg-[var(--bg-elevated)] text-[var(--accent)] border-[var(--accent)]'
+                      ? 'bg-[var(--bg-elevated)] text-[var(--accent)] border-[var(--accent)] shadow-2xs'
                       : 'border-[var(--border)] bg-[var(--bg-primary)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
                   }`}
                 >

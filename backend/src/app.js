@@ -22,8 +22,25 @@ app.use((req, res, next) => {
 });
 
 // CORS Configuration
+const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
+  .split(',')
+  .map((url) => url.trim().replace(/\/$/, ''))
+  .filter(Boolean);
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (such as mobile apps, server-to-server, curl, Postman)
+    if (!origin) return callback(null, true);
+    const normalizedOrigin = origin.replace(/\/$/, '');
+    if (
+      allowedOrigins.includes(normalizedOrigin) ||
+      allowedOrigins.includes('*') ||
+      (process.env.NODE_ENV !== 'production' && (origin.includes('localhost') || origin.includes('127.0.0.1')))
+    ) {
+      return callback(null, true);
+    }
+    return callback(new Error(`CORS policy: origin ${origin} is not allowed by Access-Control-Allow-Origin.`));
+  },
   credentials: true,
 }));
 

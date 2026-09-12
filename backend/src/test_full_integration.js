@@ -24,14 +24,22 @@ async function runFullIntegrationTest() {
   assert.strictEqual(regResult.character.totalXp, 0, 'Initial XP must be 0');
   console.log('✓ Registered test user:', testEmail, 'User ID:', userId);
 
-  // STEP 2: Starter Quests Check
-  console.log('2. Verifying Curated Starter Quests in DB...');
-  const starterTasks = await getUserTasks(userId, 'pending');
-  assert.strictEqual(starterTasks.length, 2, 'Must have 2 starter quests seeded');
-  console.log('✓ Starter quests seeded:', starterTasks.map(t => t.title));
+  // STEP 2: Initial State Verification (Clean Slate, Day 1 Streak)
+  console.log('2. Verifying Clean Slate Quests & Day 1 Streak...');
+  assert.strictEqual(regResult.character.streaks.currentStreak, 1, 'Initial Day 1 streak must be 1');
+  const initialTasks = await getUserTasks(userId, 'pending');
+  assert.strictEqual(initialTasks.length, 0, 'No auto-suggested starter quests (clean slate)');
+  console.log('✓ Clean slate verified: 0 auto quests, Streak = 1 Day');
 
   // STEP 3: Create Custom Quest
-  console.log('3. Testing Quest Creation (Epic Tier)...');
+  console.log('3. Testing Quest Creation (Medium & Epic Tiers)...');
+  const quest1 = await createTask(userId, {
+    title: 'Daily Deep Focus Session',
+    description: 'Solve problems and build project.',
+    category: 'academics',
+    difficulty: 'medium',
+    attributeType: 'intellect',
+  });
   const createdQuest = await createTask(userId, {
     title: 'Complete Hackathon Full Implementation',
     description: 'Implement frontend, backend, database, and game engine.',
@@ -41,14 +49,14 @@ async function runFullIntegrationTest() {
   });
   assert.strictEqual(createdQuest.xp_reward, 250, 'Epic quest must award 250 XP');
   assert.strictEqual(createdQuest.gold_reward, 100, 'Epic quest must award 100 Gold');
-  console.log('✓ Custom quest created successfully. Reward:', createdQuest.xp_reward, 'XP,', createdQuest.gold_reward, 'Gold');
+  console.log('✓ Custom quests created successfully.');
 
-  // STEP 4: Complete Starter Quest 1
-  console.log('4. Completing Starter Quest 1 (Medium - 60 XP, 20 Gold)...');
-  const comp1 = await completeTask(userId, starterTasks[0].id);
+  // STEP 4: Complete Quest 1
+  console.log('4. Completing Quest 1 (Medium - 60 XP, 20 Gold)...');
+  const comp1 = await completeTask(userId, quest1.id);
   assert.strictEqual(comp1.character.totalXp, 60, 'Total XP should be 60');
   assert.strictEqual(comp1.character.gold, 20, 'Gold should be 20');
-  assert.strictEqual(comp1.character.streaks.currentStreak, 1, 'Streak should be 1');
+  assert.strictEqual(comp1.character.streaks.currentStreak, 1, 'Streak should remain 1 on Day 1');
   console.log('✓ Quest 1 completed. Total XP:', comp1.character.totalXp, 'Gold:', comp1.character.gold);
 
   // STEP 5: Complete Epic Quest -> Trigger Non-linear Level-Up

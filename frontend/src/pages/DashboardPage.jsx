@@ -13,7 +13,13 @@ import {
   Loader2,
   AlertCircle,
   Sparkles,
-  Award,
+  Flame,
+  Coins,
+  Shield,
+  ArrowRight,
+  TrendingUp,
+  Target,
+  CheckCircle2,
 } from 'lucide-react';
 
 export default function DashboardPage({
@@ -28,9 +34,11 @@ export default function DashboardPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedQuest, setSelectedQuest] = useState(null);
+  const [filterView, setFilterView] = useState('all'); // 'all' | 'pending' | 'completed'
 
   // Fetch pending and today's completed tasks
   const fetchData = async () => {
+    if (!user) return;
     try {
       setLoading(true);
       setError(null);
@@ -65,16 +73,26 @@ export default function DashboardPage({
         setCompletedToday([]);
       }
     } catch (err) {
-      console.error('Failed to load dashboard data:', err);
-      setError(err?.message || 'Failed to load progress.');
+      const isAuthErr =
+        err?.message?.includes('Access denied') ||
+        err?.message?.includes('expired') ||
+        err?.message?.includes('token');
+      if (user && !isAuthErr) {
+        console.error('Failed to load dashboard data:', err);
+      }
+      if (!isAuthErr) {
+        setError(err?.message || 'Failed to load progress.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (user) {
+      fetchData();
+    }
+  }, [user]);
 
   // Complete Quest with immediate sound & optimistic update
   const handleComplete = async (taskId) => {
@@ -89,8 +107,8 @@ export default function DashboardPage({
     const newCompletedItem = {
       id: targetQuest.id,
       task_title: targetQuest.title,
-      xp_earned: Number(targetQuest.xp_reward) || 0,
-      gold_earned: Number(targetQuest.gold_reward) || 0,
+      xp_earned: Number(targetQuest.xp_reward) || 30,
+      gold_earned: Number(targetQuest.gold_reward) || 10,
       attribute_gained: targetQuest.attribute_type || 'intellect',
       attribute_points: 1,
       completed_at: new Date().toISOString(),
@@ -103,7 +121,7 @@ export default function DashboardPage({
 
     try {
       const res = await api.post(`/tasks/${taskId}/complete`, {});
-      if (res.data.success) {
+      if (res.data?.success) {
         const charData = res.data.data.character;
         updateCharacterState(charData, charData.leveledUp);
       }
@@ -128,14 +146,14 @@ export default function DashboardPage({
   const handleModalSubmit = async (formData) => {
     if (selectedQuest) {
       const res = await api.put(`/tasks/${selectedQuest.id}`, formData);
-      if (res.data.success) {
+      if (res.data?.success) {
         setTasks((prev) =>
           prev.map((t) => (t.id === selectedQuest.id ? res.data.data : t))
         );
       }
     } else {
       const res = await api.post('/tasks', formData);
-      if (res.data.success) {
+      if (res.data?.success) {
         setTasks((prev) => [res.data.data, ...prev]);
       }
     }
@@ -143,15 +161,21 @@ export default function DashboardPage({
     setIsCreateModalOpen(false);
   };
 
-  // RPG Progression Math
+  // Progression Math
   const totalXp = Number(character?.totalXp ?? character?.total_xp ?? 0);
   const levelProgress = getLevelProgress(totalXp);
   const currentLevel = character?.level ?? levelProgress.currentLevel;
-  const currentLevelXp = levelProgress.currentLevelXp;
-  const nextLevelXp = levelProgress.nextLevelXp;
-  const xpPercentage = levelProgress.progressPercentage;
+  const currentLevelBaseXp = levelProgress.currentLevelBaseXp;
+  const nextLevelBaseXp = levelProgress.nextLevelBaseXp;
+  const xpInTier = levelProgress.xpInCurrentTier;
+  const xpRequiredForTier = levelProgress.xpRequiredForNextLevel;
+  const xpRemaining = levelProgress.xpRemaining;
+  const xpPercentage = levelProgress.progressPercent;
+  const streak = character?.streaks?.currentStreak ?? character?.streaks?.current_streak ?? 0;
+  const currentGold = character?.gold ?? 0;
+  const characterTitle = character?.title || 'Ascendant';
 
-  // Task / Daily Completion Calculations
+  // Completion Metrics
   const completedCount = completedToday.length;
   const pendingCount = tasks.length;
   const totalQuestsToday = completedCount + pendingCount;
@@ -167,7 +191,7 @@ export default function DashboardPage({
     0
   );
 
-  // Formatted Live Date e.g. "Thursday, September 12"
+  // Formatted Live Date e.g. "Friday, September 12"
   const formattedDate = new Intl.DateTimeFormat('en-US', {
     weekday: 'long',
     month: 'long',
@@ -182,39 +206,59 @@ export default function DashboardPage({
   const creativityScore = Number(attrs.creativity || 10);
   const consistencyScore = Number(attrs.consistency || 10);
 
-  // Normalizing scores to display values (between 40 and 95 based on character level & stats)
   const characterAttributes = [
     {
-      id: 'mind',
-      name: 'MIND',
-      score: Math.min(99, intellectScore * 4 + 22),
-      color: 'var(--attr-mind)',
+      id: 'intellect',
+      name: 'Intellect',
+      category: 'Mind & Academics',
+      points: intellectScore,
+      color: 'var(--attr-mind, #5B8DEF)',
+      badge: 'INT',
     },
     {
-      id: 'will',
-      name: 'WILL',
-      score: Math.min(99, disciplineScore * 4 + 14),
-      color: 'var(--attr-will)',
+      id: 'discipline',
+      name: 'Discipline',
+      category: 'Will & Routines',
+      points: disciplineScore,
+      color: 'var(--attr-will, #B5E34A)',
+      badge: 'DIS',
     },
     {
-      id: 'body',
-      name: 'BODY',
-      score: Math.min(99, strengthScore * 4 + 19),
-      color: 'var(--attr-body)',
+      id: 'strength',
+      name: 'Strength',
+      category: 'Body & Fitness',
+      points: strengthScore,
+      color: 'var(--attr-body, #3FA56F)',
+      badge: 'STR',
     },
     {
-      id: 'craft',
-      name: 'CRAFT',
-      score: Math.min(99, creativityScore * 4 + 26),
-      color: 'var(--attr-craft)',
+      id: 'creativity',
+      name: 'Creativity',
+      category: 'Craft & Projects',
+      points: creativityScore,
+      color: 'var(--attr-craft, #9B7AC7)',
+      badge: 'CRT',
     },
     {
-      id: 'habit',
-      name: 'HABIT',
-      score: Math.min(99, consistencyScore * 4 + 20),
-      color: 'var(--attr-habit)',
+      id: 'consistency',
+      name: 'Consistency',
+      category: 'Habits & Streaks',
+      points: consistencyScore,
+      color: 'var(--attr-habit, #C99628)',
+      badge: 'CON',
     },
   ];
+
+  const getAttributeMeta = (type) => {
+    const key = (type || 'intellect').toLowerCase();
+    return (
+      characterAttributes.find((a) => a.id === key) || {
+        name: 'Mind',
+        color: 'var(--attr-mind, #5B8DEF)',
+        badge: 'GEN',
+      }
+    );
+  };
 
   if (loading && tasks.length === 0 && completedToday.length === 0) {
     return (
@@ -228,18 +272,38 @@ export default function DashboardPage({
   }
 
   return (
-    <div className="max-w-[760px] mx-auto space-y-4 animate-fadeIn pb-10">
-      {/* 1. TOP HEADER */}
-      <div className="space-y-0.5 pt-1 pb-1">
-        <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-[var(--accent)] block">
-          TODAY
-        </span>
-        <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)]">
-          {formattedDate}
-        </h1>
-        <p className="font-sans text-xs text-[var(--text-secondary)]">
-          Turn today's effort into progress.
-        </p>
+    <div className="max-w-[860px] mx-auto space-y-5 animate-fadeIn pb-12">
+      {/* 1. TOP HEADER BAR */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xs bg-[var(--accent-soft)] border border-[var(--accent-border)] text-[var(--accent)] font-mono text-[10px] font-bold uppercase tracking-wider">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
+              Daily Operations
+            </span>
+            <span className="text-xs text-[var(--text-muted)] font-mono">
+              • {streak} Day Streak
+            </span>
+          </div>
+          <h1 className="font-display text-2xl sm:text-3xl font-black tracking-tight text-[var(--text-primary)]">
+            {formattedDate}
+          </h1>
+          <p className="font-sans text-xs text-[var(--text-secondary)] mt-0.5">
+            Turn daily action into measurable character progress.
+          </p>
+        </div>
+
+        {/* Quick Action Button */}
+        <button
+          onClick={() => {
+            setSelectedQuest(null);
+            setIsCreateModalOpen(true);
+          }}
+          className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-sm bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-text)] font-sans text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-xs active:scale-95 shrink-0"
+        >
+          <Plus className="h-4 w-4 stroke-[2.5]" />
+          <span>New Quest</span>
+        </button>
       </div>
 
       {/* ERROR NOTICE IF ANY */}
@@ -250,226 +314,410 @@ export default function DashboardPage({
         </div>
       )}
 
-      {/* 2. CARD 1: LEVEL & TODAY'S PROGRESS (Dual Progress Overview Card) */}
-      <div className="mettle-card rounded-md p-4 border border-[var(--border-strong)] bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-2xs">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-          {/* Level Progress */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-display text-xs font-bold tracking-wider text-[var(--text-primary)] uppercase">
-                LEVEL {currentLevel}
-              </span>
-              <span className="font-mono text-[11px] font-semibold text-[var(--accent)]">
-                {Number(currentLevelXp).toLocaleString()} / {Number(nextLevelXp).toLocaleString()} XP
-              </span>
-            </div>
-            <div className="h-2 w-full rounded-full bg-[var(--bg-primary)] overflow-hidden border border-[var(--border)]">
-              <div
-                className="h-full rounded-full bg-[var(--accent)] transition-all duration-500 ease-out"
-                style={{ width: `${Math.max(4, Math.min(100, xpPercentage))}%` }}
-              />
-            </div>
-          </div>
+      {/* 2. CARD 1: COMMAND HUD — LEVEL PROGRESS & DAILY YIELD */}
+      <div className="mettle-card rounded-md p-5 sm:p-6 border border-[var(--border-strong)] bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-xs relative overflow-hidden">
+        {/* Subtle Ambient Backlight */}
+        <div className="absolute top-0 right-0 w-64 h-32 bg-[var(--accent)]/5 rounded-full blur-3xl pointer-events-none" />
 
-          {/* Today's Progress Bar */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-sans text-xs font-bold tracking-wider text-[var(--text-primary)] uppercase">
-                TODAY'S PROGRESS
-              </span>
-              <span className="font-mono text-[11px] font-semibold text-[var(--text-secondary)]">
-                {completedCount} / {totalQuestsToday} Quests
-              </span>
-            </div>
-            <div className="h-2 w-full rounded-full bg-[var(--bg-primary)] overflow-hidden border border-[var(--border)]">
-              <div
-                className="h-full rounded-full bg-[var(--accent)] transition-all duration-500 ease-out"
-                style={{ width: `${Math.max(completedCount > 0 ? 5 : 0, Math.min(100, completionPercentage))}%` }}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. CARD 2: TODAY'S QUESTS (Small Cards Grid) */}
-      <div className="mettle-card rounded-md p-4 sm:p-5 border border-[var(--border-strong)] bg-[var(--bg-surface)] text-[var(--text-primary)] space-y-3 shadow-2xs">
-        {/* Card Header */}
-        <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5">
-          <span className="font-display text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">
-            TODAY'S QUESTS
-          </span>
-          <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-xs bg-[var(--bg-primary)] border border-[var(--border)] text-[var(--text-muted)]">
-            {pendingCount} Pending
-          </span>
-        </div>
-
-        {/* Small Quests Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {/* Active Pending Tasks as Small Cards */}
-          {tasks.map((task) => (
-            <div
-              key={task.id}
-              className="group flex flex-col justify-between p-2.5 sm:p-3 rounded-md bg-[var(--bg-primary)] hover:bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-[var(--accent)] transition-all gap-2"
-            >
-              {/* Top: Circle Tick + Title + Actions */}
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-start gap-2 flex-1 min-w-0">
-                  <button
-                    onClick={() => handleComplete(task.id)}
-                    className="mt-0.5 h-4 w-4 rounded-full border border-[var(--border-strong)] hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] flex items-center justify-center shrink-0 transition-colors cursor-pointer"
-                    title="Mark as Complete"
-                  >
-                    <span className="opacity-0 group-hover:opacity-100 text-[var(--accent)] text-[8px]">
-                      ✓
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
+          {/* Left Column: Character Tier & XP Progress (7 cols) */}
+          <div className="lg:col-span-7 flex flex-col justify-between space-y-4">
+            <div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="h-10 w-10 rounded-sm bg-[var(--bg-primary)] border border-[var(--border-strong)] flex items-center justify-center font-display font-black text-sm text-[var(--accent)] shadow-2xs">
+                    L{currentLevel}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-display text-base sm:text-lg font-bold tracking-tight text-[var(--text-primary)]">
+                        LEVEL {currentLevel}
+                      </span>
+                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-xs bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)]">
+                        {characterTitle}
+                      </span>
+                    </div>
+                    <span className="text-[11px] text-[var(--text-secondary)] font-mono">
+                      {Number(totalXp).toLocaleString()} Cumulative XP
                     </span>
-                  </button>
-                  <span className="font-sans text-xs font-semibold text-[var(--text-primary)] leading-tight line-clamp-2">
-                    {task.title}
+                  </div>
+                </div>
+
+                <div className="text-right">
+                  <span className="font-mono text-xs font-bold text-[var(--accent)]">
+                    {xpPercentage}%
+                  </span>
+                  <span className="text-[10px] text-[var(--text-muted)] block font-mono">
+                    to Lvl {currentLevel + 1}
                   </span>
                 </div>
-
-                {/* Edit / Delete Icons on Hover */}
-                <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 -mr-1">
-                  <button
-                    onClick={() => {
-                      setSelectedQuest(task);
-                      setIsCreateModalOpen(true);
-                    }}
-                    className="p-1 rounded-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-colors cursor-pointer"
-                    title="Edit Quest"
-                  >
-                    <Edit2 className="h-3 w-3" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(task.id)}
-                    className="p-1 rounded-xs text-[var(--text-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger)]/10 transition-colors cursor-pointer"
-                    title="Delete Quest"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
-                </div>
               </div>
+            </div>
 
-              {/* Bottom: Attribute tag + XP Reward */}
-              <div className="flex items-center justify-between text-[10px] font-mono border-t border-[var(--border)] pt-1.5 mt-0.5">
-                <span className="capitalize text-[var(--text-muted)] font-sans font-medium text-[10px]">
-                  {task.attribute_type || 'Mind'}
+            {/* High Precision XP Gauge */}
+            <div className="space-y-1.5 pt-1">
+              <div className="h-2.5 w-full rounded-full bg-[var(--bg-primary)] overflow-hidden border border-[var(--border)] p-[1px]">
+                <div
+                  className="h-full rounded-full bg-[var(--accent)] transition-all duration-700 ease-out"
+                  style={{ width: `${Math.max(4, Math.min(100, xpPercentage))}%` }}
+                />
+              </div>
+              <div className="flex items-center justify-between text-[10px] font-mono text-[var(--text-muted)]">
+                <span>Tier: {Number(xpInTier).toLocaleString()} / {Number(xpRequiredForTier).toLocaleString()} XP</span>
+                <span>{Number(xpRemaining).toLocaleString()} XP Needed</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Daily Yield & Momentum Matrix (5 cols) */}
+          <div className="lg:col-span-5 grid grid-cols-2 gap-2.5 lg:border-l lg:border-[var(--border)] lg:pl-6">
+            {/* 1. Daily Quests Progress */}
+            <div className="p-3 rounded-sm bg-[var(--bg-primary)] border border-[var(--border)] flex flex-col justify-between">
+              <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                <span>Quests</span>
+                <Target className="h-3 w-3 text-[var(--accent)]" />
+              </div>
+              <div className="mt-2">
+                <span className="font-display text-lg font-bold text-[var(--text-primary)]">
+                  {completedCount}/{totalQuestsToday}
                 </span>
-                <span className="font-mono text-[10px] font-bold text-[var(--accent)] bg-[var(--accent-soft)] px-1.5 py-0.5 rounded-xs border border-[var(--accent-border)]">
-                  +{task.xp_reward || 30} XP
+                <span className="text-[10px] font-mono text-[var(--text-secondary)] block">
+                  {completionPercentage}% Complete
                 </span>
               </div>
             </div>
-          ))}
 
-          {/* Today's Completed Tasks as Small Cards */}
-          {completedToday.map((done) => (
-            <div
-              key={`done-${done.id}`}
-              className="flex flex-col justify-between p-2.5 sm:p-3 rounded-md bg-[var(--bg-primary)]/50 border border-[var(--border)] opacity-60 gap-2"
+            {/* 2. Consistency Streak */}
+            <div className="p-3 rounded-sm bg-[var(--bg-primary)] border border-[var(--border)] flex flex-col justify-between">
+              <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                <span>Streak</span>
+                <Flame className={`h-3 w-3 ${streak > 0 ? 'text-amber-500' : 'text-[var(--text-muted)]'}`} />
+              </div>
+              <div className="mt-2">
+                <span className="font-display text-lg font-bold text-[var(--text-primary)]">
+                  {streak} {streak === 1 ? 'Day' : 'Days'}
+                </span>
+                <span className="text-[10px] font-mono text-[var(--accent)] block">
+                  Consistent
+                </span>
+              </div>
+            </div>
+
+            {/* 3. XP Harvested Today */}
+            <div className="p-3 rounded-sm bg-[var(--bg-primary)] border border-[var(--border)] flex flex-col justify-between">
+              <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                <span>Earned XP</span>
+                <Sparkles className="h-3 w-3 text-[var(--accent)]" />
+              </div>
+              <div className="mt-2">
+                <span className="font-mono text-base sm:text-lg font-bold text-[var(--accent)]">
+                  +{earnedXpToday}
+                </span>
+                <span className="text-[10px] font-mono text-[var(--text-muted)] block">
+                  XP Today
+                </span>
+              </div>
+            </div>
+
+            {/* 4. Gold Earned Today */}
+            <div className="p-3 rounded-sm bg-[var(--bg-primary)] border border-[var(--border)] flex flex-col justify-between">
+              <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                <span>Gold Yield</span>
+                <Coins className="h-3 w-3 text-[var(--gold)]" />
+              </div>
+              <div className="mt-2">
+                <span className="font-mono text-base sm:text-lg font-bold text-[var(--gold)]">
+                  +{earnedGoldToday}
+                </span>
+                <span className="text-[10px] font-mono text-[var(--text-muted)] block">
+                  Treasury
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. CARD 2: TODAY'S QUESTS — TACTICAL MISSIONS */}
+      <div className="mettle-card rounded-md p-5 sm:p-6 border border-[var(--border-strong)] bg-[var(--bg-surface)] text-[var(--text-primary)] space-y-4 shadow-xs">
+        {/* Card Top Header & Filter Controls */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border)] pb-3">
+          <div className="flex items-center gap-2.5">
+            <h2 className="font-display text-sm sm:text-base font-bold uppercase tracking-wider text-[var(--text-primary)]">
+              TODAY'S QUESTS
+            </h2>
+            <div className="flex items-center gap-1.5">
+              <span className="px-2 py-0.5 rounded-xs bg-[var(--bg-primary)] border border-[var(--border)] font-mono text-[10px] font-bold text-[var(--accent)]">
+                {pendingCount} Active
+              </span>
+              {completedCount > 0 && (
+                <span className="px-2 py-0.5 rounded-xs bg-[var(--bg-primary)] border border-[var(--border)] font-mono text-[10px] font-bold text-[var(--text-muted)]">
+                  {completedCount} Done
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Quick Filter Tabs */}
+          <div className="flex items-center gap-1 p-0.5 rounded-sm bg-[var(--bg-primary)] border border-[var(--border)]">
+            <button
+              onClick={() => setFilterView('all')}
+              className={`px-2.5 py-1 rounded-xs font-mono text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+                filterView === 'all'
+                  ? 'bg-[var(--bg-elevated)] text-[var(--text-primary)] shadow-2xs'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+              }`}
             >
-              <div className="flex items-start gap-2">
-                <div className="mt-0.5 h-4 w-4 rounded-full bg-[var(--accent)] text-[var(--accent-text)] flex items-center justify-center shrink-0">
-                  <Check className="h-2.5 w-2.5 stroke-[3]" />
+              All ({totalQuestsToday})
+            </button>
+            <button
+              onClick={() => setFilterView('pending')}
+              className={`px-2.5 py-1 rounded-xs font-mono text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+                filterView === 'pending'
+                  ? 'bg-[var(--bg-elevated)] text-[var(--text-primary)] shadow-2xs'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+              }`}
+            >
+              Pending ({pendingCount})
+            </button>
+            <button
+              onClick={() => setFilterView('completed')}
+              className={`px-2.5 py-1 rounded-xs font-mono text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+                filterView === 'completed'
+                  ? 'bg-[var(--bg-elevated)] text-[var(--text-primary)] shadow-2xs'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+              }`}
+            >
+              Done ({completedCount})
+            </button>
+          </div>
+        </div>
+
+        {/* Quests List Container */}
+        <div className="space-y-2.5">
+          {/* Active Pending Tasks */}
+          {(filterView === 'all' || filterView === 'pending') &&
+            tasks.map((task) => {
+              const meta = getAttributeMeta(task.attribute_type);
+              return (
+                <div
+                  key={task.id}
+                  className="group flex items-center justify-between p-3.5 sm:p-4 rounded-sm bg-[var(--bg-primary)] hover:bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-[var(--accent)] transition-all gap-3 shadow-2xs"
+                >
+                  {/* Left: Custom Tactile Checkbox + Details */}
+                  <div className="flex items-center gap-3.5 flex-1 min-w-0">
+                    <button
+                      onClick={() => handleComplete(task.id)}
+                      className="h-5 w-5 rounded-full border-2 border-[var(--border-strong)] hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] flex items-center justify-center shrink-0 transition-all cursor-pointer group-hover:scale-105"
+                      title="Mark Complete & Claim XP"
+                      aria-label="Complete Quest"
+                    >
+                      <Check className="h-3 w-3 text-[var(--accent)] opacity-0 group-hover:opacity-80 transition-opacity stroke-[3]" />
+                    </button>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-sans text-xs sm:text-sm font-semibold text-[var(--text-primary)] leading-snug">
+                          {task.title}
+                        </span>
+                        <span
+                          className="inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded-xs text-[9px] font-mono font-bold uppercase tracking-wider border"
+                          style={{
+                            borderColor: `${meta.color}40`,
+                            backgroundColor: `${meta.color}15`,
+                            color: meta.color,
+                          }}
+                        >
+                          <span
+                            className="w-1.5 h-1.5 rounded-full shrink-0"
+                            style={{ backgroundColor: meta.color }}
+                          />
+                          <span>{meta.name}</span>
+                        </span>
+                      </div>
+                      {task.description && (
+                        <p className="text-[11px] text-[var(--text-secondary)] truncate font-sans mt-0.5 max-w-lg">
+                          {task.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right: Rewards & Actions */}
+                  <div className="flex items-center gap-2.5 shrink-0">
+                    {/* XP & Gold Chips */}
+                    <div className="flex items-center gap-1.5 font-mono text-[11px]">
+                      <span className="px-2 py-0.5 rounded-xs bg-[var(--accent-soft)] border border-[var(--accent-border)] font-bold text-[var(--accent)]">
+                        +{task.xp_reward || 30} XP
+                      </span>
+                      <span className="hidden sm:inline-block px-2 py-0.5 rounded-xs bg-[var(--gold)]/10 border border-[var(--gold)]/30 font-bold text-[var(--gold)]">
+                        +{task.gold_reward || 10} G
+                      </span>
+                    </div>
+
+                    {/* Action Buttons (Edit / Delete) */}
+                    <div className="flex items-center gap-1 opacity-80 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => {
+                          setSelectedQuest(task);
+                          setIsCreateModalOpen(true);
+                        }}
+                        className="p-1.5 rounded-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-colors cursor-pointer"
+                        title="Edit Quest"
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(task.id)}
+                        className="p-1.5 rounded-xs text-[var(--text-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger)]/10 transition-colors cursor-pointer"
+                        title="Delete Quest"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <span className="font-sans text-xs text-[var(--text-muted)] line-through leading-tight line-clamp-2">
-                  {done.task_title || done.title}
-                </span>
+              );
+            })}
+
+          {/* Completed Quests List */}
+          {(filterView === 'all' || filterView === 'completed') &&
+            completedToday.map((done) => (
+              <div
+                key={`done-${done.id}`}
+                className="flex items-center justify-between p-3 sm:p-3.5 rounded-sm bg-[var(--bg-primary)]/40 border border-[var(--border)] opacity-60 gap-3"
+              >
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="h-5 w-5 rounded-full bg-[var(--accent)] text-[var(--accent-text)] flex items-center justify-center shrink-0">
+                    <Check className="h-3 w-3 stroke-[3]" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="font-sans text-xs sm:text-sm text-[var(--text-muted)] line-through">
+                      {done.task_title || done.title}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 font-mono text-[10px] text-[var(--text-muted)]">
+                  <span className="text-[var(--accent)] font-semibold">
+                    +{done.xp_earned || 30} XP Claimed
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center justify-end text-[10px] font-mono border-t border-[var(--border)] pt-1.5 mt-0.5">
-                <span className="font-mono text-[10px] font-semibold text-[var(--text-muted)]">
-                  +{done.xp_earned || done.xp_reward || 30} XP
-                </span>
+            ))}
+
+          {/* Empty State */}
+          {tasks.length === 0 && completedToday.length === 0 && (
+            <div className="p-8 text-center rounded-sm bg-[var(--bg-primary)] border border-dashed border-[var(--border-strong)] space-y-3">
+              <div className="h-10 w-10 mx-auto rounded-full bg-[var(--bg-surface)] border border-[var(--border)] flex items-center justify-center text-[var(--accent)]">
+                <Target className="h-5 w-5" />
               </div>
+              <div className="space-y-1">
+                <p className="font-display text-sm font-bold text-[var(--text-primary)]">
+                  No Quests Scheduled for Today
+                </p>
+                <p className="font-sans text-xs text-[var(--text-secondary)] max-w-sm mx-auto">
+                  Create a task to build your attributes, earn XP, and level up your character.
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setSelectedQuest(null);
+                  setIsCreateModalOpen(true);
+                }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-sm bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-text)] font-sans text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-xs"
+              >
+                <Plus className="h-3.5 w-3.5 stroke-[2.5]" />
+                <span>Create First Quest</span>
+              </button>
             </div>
-          ))}
+          )}
         </div>
 
-        {/* Empty state when no quests exist */}
-        {tasks.length === 0 && completedToday.length === 0 && (
-          <div className="py-6 text-center text-xs text-[var(--text-muted)] font-sans">
-            No quests scheduled for today. Click below to add your first quest.
-          </div>
+        {/* Add Quest Bottom Prompt */}
+        {(tasks.length > 0 || completedToday.length > 0) && (
+          <button
+            onClick={() => {
+              setSelectedQuest(null);
+              setIsCreateModalOpen(true);
+            }}
+            className="w-full py-2.5 rounded-sm border border-dashed border-[var(--border-strong)] hover:border-[var(--accent)] bg-[var(--bg-primary)] hover:bg-[var(--accent-soft)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-sans text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer pt-2 mt-1"
+          >
+            <Plus className="h-3.5 w-3.5 text-[var(--accent)] stroke-[2.5]" />
+            <span>Add Another Quest</span>
+          </button>
         )}
-
-        {/* Add Quest Button */}
-        <button
-          onClick={() => {
-            setSelectedQuest(null);
-            setIsCreateModalOpen(true);
-          }}
-          className="w-full py-2 rounded-sm border border-dashed border-[var(--border-strong)] hover:border-[var(--accent)] bg-[var(--bg-primary)] hover:bg-[var(--accent-soft)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-sans text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer mt-2"
-        >
-          <Plus className="h-3.5 w-3.5 text-[var(--accent)] stroke-[2.5]" />
-          <span>+ Add Quest</span>
-        </button>
       </div>
 
-      {/* 4. CARD 3: DAILY PROGRESS */}
-      <div className="mettle-card rounded-md p-4 sm:p-5 border border-[var(--border-strong)] bg-[var(--bg-surface)] text-[var(--text-primary)] space-y-3 shadow-2xs">
-        <span className="font-display text-xs font-bold uppercase tracking-wider text-[var(--text-primary)] block border-b border-[var(--border)] pb-2.5">
-          DAILY PROGRESS
-        </span>
-
-        <div className="space-y-1.5 pt-1">
-          <div className="flex items-baseline justify-between">
-            <span className="font-display text-xl sm:text-2xl font-black text-[var(--accent)] tracking-tight">
-              {completionPercentage}% complete
-            </span>
-            <span className="font-sans text-xs font-medium text-[var(--text-secondary)]">
-              {completedCount} of {totalQuestsToday} quests completed
-            </span>
+      {/* 4. CARD 3: ATTRIBUTE MASTERY MATRIX */}
+      <div className="mettle-card rounded-md p-5 sm:p-6 border border-[var(--border-strong)] bg-[var(--bg-surface)] text-[var(--text-primary)] space-y-4 shadow-xs">
+        <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
+          <div>
+            <h2 className="font-display text-sm sm:text-base font-bold uppercase tracking-wider text-[var(--text-primary)]">
+              ATTRIBUTE MASTERY
+            </h2>
+            <p className="text-[11px] text-[var(--text-secondary)] font-sans mt-0.5">
+              Attributes scale as you complete related real-world quests.
+            </p>
           </div>
 
-          <div className="flex items-center gap-3 pt-2">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-[var(--bg-primary)] border border-[var(--border)]">
-              <span className="font-mono text-xs font-bold text-[var(--accent)]">
-                +{earnedXpToday} XP
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-[var(--bg-primary)] border border-[var(--border)]">
-              <span className="font-mono text-xs font-bold text-[var(--gold)]">
-                +{earnedGoldToday} Gold
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 5. CARD 4: YOUR CHARACTER (Compact Attributes) */}
-      <div className="mettle-card rounded-md p-4 sm:p-5 border border-[var(--border-strong)] bg-[var(--bg-surface)] text-[var(--text-primary)] space-y-3 shadow-2xs">
-        <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5">
-          <span className="font-display text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">
-            YOUR CHARACTER
-          </span>
           <button
             onClick={() => setActiveTab('character')}
-            className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--accent)] hover:underline cursor-pointer"
+            className="flex items-center gap-1 text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--accent)] hover:underline cursor-pointer group"
           >
-            View Full Stats →
+            <span>Character Sheet</span>
+            <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
           </button>
         </div>
 
-        <div className="space-y-2.5 pt-1">
-          {characterAttributes.map((attr) => (
-            <div key={attr.id} className="flex items-center gap-3 text-xs">
-              <span className="w-14 font-mono text-[11px] font-bold text-[var(--text-secondary)] uppercase shrink-0">
-                {attr.name}
-              </span>
-              <div className="flex-1 h-2 rounded-full bg-[var(--bg-primary)] overflow-hidden border border-[var(--border)]">
-                <div
-                  className="h-full rounded-full transition-all duration-500 ease-out"
-                  style={{
-                    width: `${attr.score}%`,
-                    backgroundColor: attr.color,
-                  }}
-                />
+        {/* Attributes Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
+          {characterAttributes.map((attr) => {
+            const maxTier = 50;
+            const progressRatio = Math.min(100, Math.max(12, (attr.points / maxTier) * 100));
+            return (
+              <div
+                key={attr.id}
+                className="p-3.5 rounded-sm bg-[var(--bg-primary)] border border-[var(--border)] hover:border-[var(--border-strong)] transition-all space-y-2.5"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span
+                      className="w-2.5 h-2.5 rounded-full shrink-0"
+                      style={{
+                        backgroundColor: attr.color,
+                        boxShadow: `0 0 6px ${attr.color}40`,
+                      }}
+                    />
+                    <div>
+                      <span className="font-sans text-xs font-bold text-[var(--text-primary)] block">
+                        {attr.name}
+                      </span>
+                      <span className="text-[10px] text-[var(--text-muted)] font-sans">
+                        {attr.category}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="font-mono text-xs font-bold text-[var(--text-primary)] px-2 py-0.5 rounded-xs bg-[var(--bg-elevated)] border border-[var(--border)]">
+                    {attr.points} <span className="text-[9px] text-[var(--text-muted)]">pts</span>
+                  </span>
+                </div>
+
+                {/* Micro Progress Bar */}
+                <div className="space-y-1">
+                  <div className="h-1.5 w-full rounded-full bg-[var(--bg-surface)] overflow-hidden border border-[var(--border)]">
+                    <div
+                      className="h-full rounded-full transition-all duration-500 ease-out"
+                      style={{
+                        width: `${progressRatio}%`,
+                        backgroundColor: attr.color,
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
-              <span className="w-7 text-right font-mono text-xs font-bold text-[var(--text-primary)] shrink-0">
-                {attr.score}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

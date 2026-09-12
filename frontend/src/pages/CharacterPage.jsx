@@ -25,6 +25,7 @@ export default function CharacterPage() {
 
   useEffect(() => {
     const fetchExtraData = async () => {
+      if (!user) return;
       try {
         const [badgesRes, activityRes] = await Promise.all([
           api.get('/badges'),
@@ -33,18 +34,24 @@ export default function CharacterPage() {
         if (badgesRes.data.success) setBadges(badgesRes.data.data);
         if (activityRes.data.success) setActivities(activityRes.data.data);
       } catch (err) {
-        console.error('Failed to load character data', err);
+        const isAuthErr =
+          err?.message?.includes('Access denied') ||
+          err?.message?.includes('expired') ||
+          err?.message?.includes('token');
+        if (user && !isAuthErr) console.error('Failed to load character data', err);
       }
     };
-    fetchExtraData();
-  }, []);
+    if (user) {
+      fetchExtraData();
+    }
+  }, [user]);
 
   const attributeList = [
-    { label: 'Mind', key: 'intellect', val: attributes.intellect ?? 10, desc: 'Learning, programming, and academics.', color: 'var(--attr-mind)' },
-    { label: 'Will', key: 'discipline', val: attributes.discipline ?? 10, desc: 'Discipline, adherence, and routine execution.', color: 'var(--attr-will)' },
-    { label: 'Body', key: 'strength', val: attributes.strength ?? 10, desc: 'Fitness, physical conditioning, and health.', color: 'var(--attr-body)' },
-    { label: 'Craft', key: 'creativity', val: attributes.creativity ?? 10, desc: 'Creativity, design, writing, and build projects.', color: 'var(--attr-craft)' },
-    { label: 'Habit', key: 'consistency', val: attributes.consistency ?? 10, desc: 'Consistency and uninterrupted daily streaks.', color: 'var(--attr-habit)' },
+    { label: 'Intellect', sub: 'Mind', key: 'intellect', val: attributes.intellect ?? 10, desc: 'Academics, learning, deep work & problem-solving.', color: 'var(--attr-mind, #5B8DEF)' },
+    { label: 'Discipline', sub: 'Will', key: 'discipline', val: attributes.discipline ?? 10, desc: 'Morning routines, daily adherence & self-control.', color: 'var(--attr-will, #B5E34A)' },
+    { label: 'Strength', sub: 'Body', key: 'strength', val: attributes.strength ?? 10, desc: 'Fitness, health, workouts & physical training.', color: 'var(--attr-body, #3FA56F)' },
+    { label: 'Creativity', sub: 'Craft', key: 'creativity', val: attributes.creativity ?? 10, desc: 'Design, building projects, writing & innovation.', color: 'var(--attr-craft, #9B7AC7)' },
+    { label: 'Consistency', sub: 'Habit', key: 'consistency', val: attributes.consistency ?? 10, desc: 'Unbroken daily habit streaks & momentum.', color: 'var(--attr-habit, #C99628)' },
   ];
 
   return (
@@ -158,32 +165,51 @@ export default function CharacterPage() {
             {/* Right: Attributes Breakdown List */}
             <div className="md:col-span-6 space-y-4">
               <div className="mettle-panel rounded-md p-6 space-y-4 bg-[var(--bg-surface)]">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] block">
-                  Personal Attributes
-                </span>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] block">
+                    Personal Attributes
+                  </span>
+                  <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                    Points earned by completing categorized quests. Every quest grants +1 to +3 points.
+                  </p>
+                </div>
 
                 <div className="space-y-3">
                   {attributeList.map((attr) => (
-                    <div key={attr.key} className="p-3 rounded-sm bg-[var(--bg-elevated)] border border-[var(--border)]">
-                      <div className="flex items-center justify-between mb-1">
-                        <div>
-                          <span className="font-sans text-xs font-semibold" style={{ color: attr.color }}>
-                            {attr.label}
-                          </span>
-                          <span className="text-[11px] text-[var(--text-muted)] ml-2">
-                            {attr.desc}
-                          </span>
+                    <div key={attr.key} className="p-3.5 rounded-sm bg-[var(--bg-elevated)] border border-[var(--border)] space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <span
+                            className="w-2.5 h-2.5 rounded-full shrink-0"
+                            style={{
+                              backgroundColor: attr.color,
+                              boxShadow: `0 0 6px ${attr.color}40`,
+                            }}
+                          />
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-sans text-xs font-bold" style={{ color: attr.color }}>
+                                {attr.label}
+                              </span>
+                              <span className="text-[10px] text-[var(--text-muted)] font-mono">
+                                ({attr.sub})
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-[var(--text-secondary)]">
+                              {attr.desc}
+                            </p>
+                          </div>
                         </div>
-                        <span className="font-display text-sm font-black text-[var(--text-primary)]">
-                          {attr.val}
+                        <span className="font-mono text-sm font-bold text-[var(--text-primary)] shrink-0 pl-2">
+                          {attr.val} <span className="text-[10px] font-normal text-[var(--text-muted)]">pts</span>
                         </span>
                       </div>
-                      <div className="w-full h-1.5 rounded-sm bg-[var(--bg-primary)] overflow-hidden">
+                      <div className="w-full h-1.5 rounded-full bg-[var(--bg-primary)] overflow-hidden border border-[var(--border)]">
                         <div
-                          className="h-full"
+                          className="h-full rounded-full transition-all duration-500 ease-out"
                           style={{
                             backgroundColor: attr.color,
-                            width: `${Math.min(100, Math.max(10, (attr.val / 60) * 100))}%`,
+                            width: `${Math.min(100, Math.max(15, (attr.val / 50) * 100))}%`,
                           }}
                         />
                       </div>
@@ -203,7 +229,7 @@ export default function CharacterPage() {
                   </div>
                   <button
                     onClick={() => setShowFormula(!showFormula)}
-                    className="text-xs font-semibold text-[var(--accent)] hover:underline"
+                    className="text-xs font-semibold text-[var(--accent)] hover:underline cursor-pointer"
                   >
                     {showFormula ? 'Hide formula' : 'View formula'}
                   </button>
@@ -215,9 +241,9 @@ export default function CharacterPage() {
 
                 {showFormula && (
                   <div className="mt-3 p-3 rounded-sm bg-[var(--bg-primary)] border border-[var(--border)] font-mono text-xs text-[var(--text-primary)]">
-                    <code>Required XP ∝ (Level − 1)^1.5</code>
+                    <code>Required XP = round(250 × (Level − 1)^1.5)</code>
                     <p className="text-[11px] text-[var(--text-muted)] mt-1 font-sans">
-                      Base XP per tier = 100 × (N − 1)^1.5. Progress is mathematically continuous with zero float drift.
+                      Base XP per tier = 250 × (N − 1)^1.5. Progress is mathematically continuous with zero float drift.
                     </p>
                   </div>
                 )}

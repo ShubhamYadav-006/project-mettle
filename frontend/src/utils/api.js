@@ -1,7 +1,11 @@
 import axios from 'axios';
 
+const apiBase = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL.replace(/\/$/, '')}/api`
+  : '/api';
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: apiBase,
   withCredentials: true, // Send HTTP-only cookies automatically
   headers: {
     'Content-Type': 'application/json',
@@ -24,10 +28,18 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor for global error formatting
+// Response Interceptor for global error formatting & auth expiration cleanup
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    const status = error.response?.status;
+    if (status === 401 && typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('mettle_token');
+        window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+      } catch (e) {}
+    }
+
     const message =
       (error.response && error.response.data && error.response.data.message) ||
       error.message ||

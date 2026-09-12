@@ -1,864 +1,234 @@
-# METTLE — UI/UX Design System & Production Specification
+# ⚔️ METTLE — UI/UX Design System & Production Specification
 
-> **Version:** 3.0 — Distinctive Product Redesign  
-> **Target:** React + Tailwind CSS + Vanilla CSS Tokens + SVG  
-> **Primary Theme:** Obsidian / Warm Neutral Dark  
-> **Design Philosophy:** Less dashboard. Less decoration. More identity. More progression.  
->
-> **Core Idea:**  
-> *Real-world effort becomes visible character growth.*
+> **Version:** 3.1 — Production Implementation Standard  
+> **Brand Name:** Mettle  
+> **Target Stack:** React 18 + Tailwind CSS (v3.4) + CSS Custom Properties (Theming) + Lucide Icons + Web Audio API  
+> **Aesthetic Identity:** Monochrome + Electric Lime (`#B5E34A`)  
+> **Design Philosophy:** Minimalist wireframe precision. Less SaaS clutter. High-density actionable cards. Real-world discipline becomes visible character growth.
 
 ---
 
-## 1. Product Design Philosophy
+## 📑 Table of Contents
 
-METTLE is not a conventional productivity dashboard.
-
-It should feel like a personal progression instrument where the user's real-world actions gradually build their character.
-
-### Core User Loop:
-```
-I HAVE WORK TO DO
-        ↓
-I COMPLETE A QUEST
-        ↓
-MY CHARACTER GROWS
-        ↓
-MY PROGRESS BECOMES VISIBLE
-        ↓
-I WANT TO COME BACK TOMORROW
-```
-
-### UI Priorities (in strict order):
-1. **Today**
-2. **Action**
-3. **Progress**
-4. **Character**
-5. **Reward**
-6. **History**
-
-*Everything else is secondary.*
+- [1. Brand Identity & Product Philosophy](#1-brand-identity--product-philosophy)
+- [2. Color System & Design Tokens](#2-color-system--design-tokens)
+- [3. Typography & Hierarchy](#3-typography--hierarchy)
+- [4. Navigation & Header Specification](#4-navigation--header-specification)
+- [5. Dashboard & Screen Layouts](#5-dashboard--screen-layouts)
+- [6. High-Density Quest Cards](#6-high-density-quest-cards)
+- [7. RPG Engine & Level Progression](#7-rpg-engine--level-progression)
+- [8. Attribute Radar & Character Stats](#8-attribute-radar--character-stats)
+- [9. Reward Bazaar & Economy](#9-reward-bazaar--economy)
+- [10. Audio Synthesis & Micro-Interactions](#10-audio-synthesis--micro-interactions)
+- [11. Responsive Architecture & Accessibility](#11-responsive-architecture--accessibility)
 
 ---
 
-## 2. Anti-AI Design Rules
+## 1. Brand Identity & Product Philosophy
 
-METTLE must **NOT** look like a generated SaaS template.
+Mettle converts everyday academic, routine, and discipline efforts into a tangible RPG character progression engine.
 
-### Avoid the Following Patterns:
-- Excessive glassmorphism
-- Excessive rounded cards
-- Excessive gradients
-- Neon purple dashboards
-- Glowing borders everywhere
-- Floating decorative blobs
-- Random gradient backgrounds
-- Excessive shadows
-- Excessive badges
-- Emoji-based UI
-- Four identical statistic cards
-- Cards inside cards inside cards
-- Generic *"Welcome back!"*
-- Generic SaaS hero sections
-- Giant empty dashboard areas
-- Unnecessary illustrations
-- Excessive icon usage
-- Unnecessary animations
-- Excessive blur
-- Excessive pill-shaped UI
-
-### 🏆 Golden Rule:
-> **NOT EVERYTHING NEEDS TO BE A CARD.**
-
-### Use:
-- Whitespace
-- Typography
-- Dividers
-- Alignment
-- Hierarchy
-- Scale
-- Restrained color
-
-*...to create structure.*
-
----
-
-## 3. Brand Personality
-
-### METTLE Should Feel:
-- Confident
-- Disciplined
-- Focused
-- Mature
-- Tactile
-- Slightly mysterious
-- Rewarding
-- Personal
-- Premium
-
-### It Should NOT Feel:
-- Childish
-- Fantasy-heavy
-- Corporate
-- Cyberpunk-heavy
-- Cartoonish
-- Overly futuristic
-- Gamified for the sake of gamification
-
-> *The RPG layer should feel earned, not decorative.*
-
----
-
-## 4. Visual Direction
-
-The visual language is inspired by:
-- Character sheets
-- Field journals
-- Training logs
-- Modern editorial interfaces
-- Premium dark-mode applications
-- Tactical interfaces
-- Progression systems
-
-The combination creates a visual identity unique to METTLE.
-
-### Design Principle:
-```
-EDITORIAL STRUCTURE
-        +
-TACTILE RPG FEEDBACK
-        +
-MODERN PRODUCT USABILITY
+### The Core Loop:
+```text
+┌────────────────────────┐
+│  REAL-WORLD TASK DONE  │
+└───────────┬────────────┘
+            │
+            ▼
+┌────────────────────────┐
+│   COMPLETE IN METTLE   │ (XP, Gold, Attribute Point, Streak Sync)
+└───────────┬────────────┘
+            │
+            ▼
+┌────────────────────────┐
+│  CHARACTER & ATTRIBUTE │ (Radar Growth, Non-linear Level Up)
+│      PROGRESSION       │
+└───────────┬────────────┘
+            │
+            ▼
+┌────────────────────────┐
+│ REPEAT FOR CONSISTENCY │ (Streak Badges, Bazaar Rewards)
+└────────────────────────┘
 ```
 
 ---
 
-## 5. Color System
+## 2. Color System & Design Tokens
 
-The default interface should be predominantly neutral.
+Mettle uses a dual-mode **Monochrome + Electric Lime** design system configured via CSS Custom Properties in `index.css`:
 
-### 5.1 Base Tokens
-
+### 2.1 CSS Variables (`:root` - Light Mode)
 ```css
---color-bg: #0c0d0f;
---color-surface: #131518;
---color-surface-raised: #191c20;
+--bg-primary: #F7F7F7;
+--bg-secondary: #F1F1F1;
+--bg-surface: #FFFFFF;
+--bg-elevated: #FFFFFF;
 
---color-text-primary: #f2f0ea;
---color-text-secondary: #a6a7aa;
---color-text-muted: #6f7277;
+--text-primary: #111111;
+--text-secondary: #5F5F5F;
+--text-muted: #8A8A8A;
 
---color-border: rgba(255, 255, 255, 0.09);
---color-border-strong: rgba(255, 255, 255, 0.16);
+--accent: #B5E34A;
+--accent-hover: #A4D13D;
+--accent-text: #111111;
+--accent-soft: rgba(181, 227, 74, 0.12);
+--accent-border: rgba(181, 227, 74, 0.35);
+
+--border: #E2E2E2;
+--border-strong: #CCCCCC;
+
+--gold: #C99628;
+--danger: #D95C55;
+--success: #3FA56F;
 ```
 
-> **Rule:** Do not create a gradient background. The background should remain visually quiet.
-
----
-
-## 6. Accent System
-
-Use **one primary product accent** rather than multiple competing neon colors.
-
+### 2.2 Dark Mode (`.dark`)
 ```css
---color-accent: #d8ff55;
---color-accent-soft: rgba(216, 255, 85, 0.12);
---color-accent-border: rgba(216, 255, 85, 0.30);
+--bg-primary: #0D0D0D;
+--bg-secondary: #141414;
+--bg-surface: #1A1A1A;
+--bg-elevated: #222222;
+
+--text-primary: #F5F5F5;
+--text-secondary: #A6A6A6;
+--text-muted: #707070;
+
+--accent: #B5E34A;
+--accent-hover: #C5F05C;
+--accent-soft: rgba(181, 227, 74, 0.10);
+--accent-border: rgba(181, 227, 74, 0.25);
+
+--border: #2A2A2A;
+--border-strong: #3A3A3A;
+
+--gold: #E6B84D;
+--danger: #F27A72;
+--success: #65C99A;
 ```
 
-### The Accent Represents:
-**METTLE / PROGRESS / ACTION**
+---
 
-### It Should Primarily Appear On:
-- XP indicators
-- Completion states
-- Primary CTA
-- Active navigation
-- Important progression
-- Level-up moments
+## 3. Typography & Hierarchy
 
-> *Do not use it everywhere.*
+- **Brand & Display Headings**: `Space Grotesk`, sans-serif (`font-display`, `font-bold` / `font-black`)
+- **Body & UI Elements**: `Inter`, system-ui, sans-serif (`font-sans`)
+- **Data, Stats & Numbers**: `JetBrains Mono` / monospace (`font-mono`)
 
 ---
 
-## 7. Attribute Colors
+## 4. Navigation & Header Specification
 
-Attributes retain individual identities, but colors remain restrained.
-
-| Attribute | Color | Usage / Association |
-| :--- | :--- | :--- |
-| **Mind** | `#6EA8FE` | Learning / coding / academics |
-| **Will** | `#B18CFF` | Discipline / routines / habits |
-| **Body** | `#F27A72` | Fitness / gym / physical health |
-| **Craft** | `#E58AB8` | Creativity / design / writing |
-| **Habit** | `#65C99A` | Consistency / daily streaks |
-| **Gold** | `#E6B84D` | Economy & rewards treasury |
-
-### Usage Rules:
-- Use attribute colors primarily for small indicators, SVG charts, progress markers, and subtle labels.
-- **Never make entire cards brightly colored.**
-
----
-
-## 8. Typography
-
-### Typefaces:
-- **Display:** `Outfit`
-- **Interface:** `Inter`
-
-### Role Distribution:
-- **`Outfit`:** Page titles, level numbers, XP values, major progression, character identity.
-- **`Inter`:** Body text, labels, metadata, navigation, form inputs.
-
----
-
-## 9. Typography Hierarchy
-
-Large numbers communicate importance.
-
-### Examples:
-```text
-LEVEL
-12
-```
-*(rather than "Level 12")*
+The top navigation bar is a razor-sharp, minimal, wireframe-segmented bar:
 
 ```text
-2,840
-XP
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Mettle          │ Level 3 Shubham │ 🔥 1 day │ 🪙 40 │ ☾ / ☼ │ ⋮            │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-- Use typography as a foundational design element.
-- Do not make every heading bold and oversized.
+### Components:
+1. **Brand**: Clean title-case `Mettle` button linking to the Dashboard.
+2. **Player Badge**: Displays `Level {level} {firstName}` in accent text. Opens Profile.
+3. **Streak Pill**: Displays flame icon with `{streak} day` or `{streak} days`.
+4. **Treasury Counter**: Displays coin icon with current gold balance. Opens Bazaar/Shop.
+5. **Theme Switcher**: Smooth toggle between Light (`☼`) and Dark (`☾`) modes.
+6. **Options Popover (`⋮`)**: Opens clean dropdown for Profile, Character Stats, and Logout.
 
 ---
 
-## 10. Layout Philosophy
+## 5. Dashboard & Screen Layouts
 
-- **Grid:** 12-column responsive layout.
-- **Maximum Content Width:** `1200px`
-- **Desktop Architecture:** `260px` fixed navigation + Main content area.
-
-> The main content should **NOT** be a grid of identical cards.
-
-### Use:
-- Asymmetric layouts
-- Large primary areas
-- Smaller supporting information
-- Editorial spacing
-- Horizontal sections
-- Occasional full-width sections
-
----
-
-## 11. Application Shell
-
-### Desktop Structure:
-```text
-┌──────────────┬──────────────────────────────────┐
-│              │             HEADER               │
-│    METTLE    ├──────────────────────────────────┤
-│              │                                  │
-│    TODAY     │                                  │
-│    QUESTS    │           MAIN CONTENT           │
-│    CHARACTER │                                  │
-│    REWARDS   │                                  │
-│    HISTORY   │                                  │
-│              │                                  │
-└──────────────┴──────────────────────────────────┘
-```
-
-### Sidebar Layout:
-```text
-METTLE
-
-TODAY
-QUESTS
-CHARACTER
-REWARDS
-HISTORY
-
-────────────────
-LEVEL 12
-2,840 XP
-────────────────
-
-"Small actions.
-Strong character."
-```
-
-> The sidebar should be visually quiet. Do not turn it into a glowing gaming HUD.
-
----
-
-## 12. Mobile Navigation
-
-- Use a compact bottom navigation bar.
-- **Primary Items:** `Today` · `Quests` · `Character` · `Rewards`
-- A central `+` button may be used for quick quest creation.
-- The button should feel like a physical tactile action control, not a floating neon orb.
-
----
-
-## 13. Global Header
-
-The header should be minimal.
-
-### Elements Displayed:
-```text
-STREAK 07   •   GOLD 1,240   •   LVL 12   •   Profile
-```
-
-- Do not put every possible control in the header.
-- Audio controls should be secondary.
-
----
-
-## 14. Dashboard — "TODAY"
-
-The dashboard is conceptually named: **TODAY**.
-
-### Copywriting:
-- **Avoid:** *"Welcome back, Shubham!"*
-- **Prefer:**
-  ```text
-  TODAY
-  Thursday, September 12
-
-  Build your mettle.
-  ```
-
-> *The user should immediately see what matters today.*
-
----
-
-## 15. Dashboard Structure
+The application maintains a high-density, actionable dashboard focused on immediate daily execution:
 
 ```text
-TODAY
-│
-├── Character / Progress
-│
-├── Today's Progress
-│
-├── Active Quests
-│
-├── Attributes
-│
-└── Recent Activity
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 📅 TODAY — ACTIVE FOCUS                                 [+ Fast Quest]      │
+├────────────────────────────────────────┬────────────────────────────────────┤
+│ ⚔️ ACTIVE QUESTS (Compact Cards)        │ 📊 HERO PROGRESSION & RADAR        │
+│                                        │                                    │
+│ ┌────────────────────────────────────┐ │ Level 3 • Apprentice Scholar       │
+│ │ [✓] 45-min Deep Focus    Medium    │ │ Total XP: 740 / Next: 1299         │
+│ │ 📚 Academics • Intellect           │ │ [████████░░░░░░░░] 16%             │
+│ │ ⚡ +60 XP  🪙 +20 Gold             │ │                                    │
+│ └────────────────────────────────────┘ │ 5-Axis Attribute Radar:            │
+│ ┌────────────────────────────────────┐ │ • Strength      • Intellect        │
+│ │ [✓] Daily Workout        Easy      │ │ • Discipline    • Creativity       │
+│ │ 🏋️ Health • Strength               │ │ • Consistency                      │
+│ │ ⚡ +30 XP  🪙 +10 Gold             │ │                                    │
+│ └────────────────────────────────────┘ │ 🛡️ Streak Freeze Shields: 1 Active │
+└────────────────────────────────────────┴────────────────────────────────────┘
 ```
 
 ---
 
-## 16. Hero / Character Progress
+## 6. High-Density Quest Cards
 
-Do not create a giant decorative hero card. Instead create a strong **horizontal progression section**.
-
-### Example:
-```text
-LEVEL 12  NOVICE SCHOLAR
-
-2,840 XP
-───────────────────────────────
-660 XP until Level 13
-
-METTLE SCORE
-742
-```
-
-- Character avatar sits beside this information.
-- Keep it restrained and sharp.
+Quest cards are engineered for fast visual scanning and instant action:
+- **Checkbox Completion Button**: Single-click completion triggering instant XP, Gold, Stat reward calculations, sound synthesizer audio feedback, and celebratory confetti.
+- **Difficulty Badges**:
+  - `Trivial`: Gray badge (`+15 XP`, `+5 Gold`)
+  - `Easy`: Green badge (`+30 XP`, `+10 Gold`)
+  - `Medium`: Yellow badge (`+60 XP`, `+20 Gold`)
+  - `Hard`: Orange badge (`+120 XP`, `+45 Gold`)
+  - `Epic`: Purple badge (`+250 XP`, `+100 Gold`)
+- **Category & Attribute Tag**: Directly connects completed work to RPG attribute points.
+- **Quick Action Hover**: Inline edit and delete controls.
 
 ---
 
-## 17. XP Visualization
+## 7. RPG Engine & Level Progression
 
-XP is one of the strongest visual anchors.
+Progression follows a strict **non-linear mathematical formula** executed authoritatively by the backend:
 
-### Implementation:
-- Clean horizontal progress
-- Animated fill
-- Numerical values
-- Level marker
+$$\text{Required Cumulative XP for Level } N = \text{round}\left(250 \times (N - 1)^{1.5}\right)$$
 
-### Example:
-```text
-LEVEL 12
-2,840 / 3,500 XP
-━━━━━━━━━━━━━━━━━━━━━━━●━━━━
-LEVEL 13
-```
-
-> *Avoid excessive glowing effects.*
+### Milestone Thresholds:
+- **Level 1**: 0 XP *(Novice Scholar)*
+- **Level 2**: 250 XP *(Novice Scholar)*
+- **Level 3**: 707 XP *(Apprentice Scholar)*
+- **Level 4**: 1,299 XP *(Apprentice Scholar)*
+- **Level 5**: 2,000 XP *(Disciplined Practitioner)*
+- **Level 6**: 2,795 XP *(Disciplined Practitioner)*
+- **Level 7**: 3,674 XP *(Adept Knight)*
+- **Level 10**: 6,750 XP *(Elite Vanguard)*
+- **Level 15**: 13,095 XP *(Master Paragon)*
+- **Level 20**: 20,705 XP *(Grandmaster of Mettle)*
 
 ---
 
-## 18. Today's Progress
+## 8. Attribute Radar & Character Stats
 
-Create one clear visual summary:
-
-```text
-TODAY'S PROGRESS
-
-4 / 7
-QUESTS COMPLETE
-
-████████████████░░░░░
-```
-
-### Supporting Information:
-```text
-+320 XP   •   +45 Gold   •   +1 Discipline
-```
-
-> *Do not split these into separate fragmented statistic cards.*
+Characters build 5 core life attributes stored in PostgreSQL:
+1. **Intellect**: Developed through deep study, research, and problem-solving quests.
+2. **Discipline**: Built by morning routines, adherence, and difficult commitments.
+3. **Strength**: Built through physical fitness, workout, and health quests.
+4. **Creativity**: Developed via design, building, and innovative projects.
+5. **Consistency**: Cultivated automatically through daily active habit streaks.
 
 ---
 
-## 19. Quest System
+## 9. Reward Bazaar & Economy
 
-Quests are the core interaction and should feel like entries in a personal mission log.
-
-### Quest Entry Example:
-```text
-01
-READ 30 PAGES
-Mind · Medium
-
-+80 XP   +15 GOLD                       [ COMPLETE ]
-────────────────────────────────────────────────────
-```
-
-*Each quest must have strong typographical hierarchy.*
+- **Virtual Currency**: Gold earned exclusively through verified quest completion and level-up rewards.
+- **Item Catalog**:
+  - `item_streak_freeze`: Streak Freeze Shield (Prevents streak reset on missed days).
+  - `item_focus_elixir`: Focus Elixir (Consumable XP multiplier).
+  - `item_custom_reward`: Self-defined custom user milestone reward vouchers.
+- **Strict Anti-Cheat**: Purchases and balances are validated atomically inside database transactions.
 
 ---
 
-## 20. Quest Interaction
+## 10. Audio Synthesis & Micro-Interactions
 
-Completion should be satisfying, crisp, and fast.
-
-### State Progression:
-- **Pending:** `[ ○ ] READ 30 PAGES`
-- **Completed:** 
-  ```text
-  [ ✓ ] READ 30 PAGES
-        +80 XP   +15 GOLD
-  ```
-
-### Micro-Feedback:
-- Subtle scale transition
-- Check animation
-- XP number transition
-- Progress bar increment
-
-> *Avoid giant screen explosions for every standard daily quest.*
+- **Zero Asset Dependencies**: Sound synthesis is powered dynamically via the browser Web Audio API (`AudioContext`).
+- **Complete Sound**: Uplifting harmonic two-tone chord on quest completion (`523.25 Hz -> 659.25 Hz`).
+- **Click Sound**: Soft acoustic click (`800 Hz -> 200 Hz`) on navigation and button interaction.
+- **Level-Up Modal**: Dramatic modal takeover with dynamic confetti burst.
 
 ---
 
-## 21. Fast Quest Creation
-
-Provide a quick inline creation field:
-
-```text
-Add a quest...                                [ Create ]
-```
-
-- Clicking advanced options reveals: `category`, `difficulty`, `due date`, `reward`.
-- Do not force users through a full modal for simple tasks.
-
----
-
-## 22. Character Page
-
-The Character page functions as the user's personal identity screen.
-
-### Structure:
-```text
-CHARACTER
-
-LEVEL 12
-NOVICE SCHOLAR
-
-METTLE SCORE
-742
-
-──────────────────────
-
-ATTRIBUTES
-MIND   82
-WILL   71
-BODY   64
-CRAFT  78
-HABIT  91
-
-──────────────────────
-
-PROGRESSION
-RADAR / SVG CHARACTER MAP
-```
-
----
-
-## 23. Attribute Visualization
-
-Use the 5-axis SVG radar chart with an elegant, minimal presentation.
-
-### Radar Chart Guidelines:
-- Thin lines
-- Restrained attribute colors
-- Subtle fill opacity
-- Animate only when values change
-
-> *Do not turn it into a glowing neon spider-web.*
-
----
-
-## 24. Level Formula
-
-Keep the non-linear progression concept transparent and accessible.
-
-Display it as an optional informational section:
-
-```text
-HOW PROGRESSION WORKS
-
-Your required XP increases as you level up,
-so higher levels represent sustained effort.
-
-Required XP ∝ (Level − 1)^1.5
-```
-
-- Provide an optional *"View formula"* disclosure if needed.
-
----
-
-## 25. Badges & Achievements
-
-Achievements should feel collectible and prestigious.
-
-### Guidelines:
-- Subtle locked state
-- Strong typography
-- Clean iconography
-- Clear requirement threshold
-- Unlock timestamp
-- Avoid dozens of cluttered badges (*Quality > Quantity*).
-
----
-
-## 26. Activity History
-
-Use a clean timeline format rather than fragmented cards.
-
-### Example:
-```text
-TODAY
-10:42   Quest completed (+80 XP)
-09:20   Reached 2,800 XP milestone
-08:10   Morning routine completed (+40 XP)
-
-────────────────
-
-YESTERDAY
-...
-```
-
-*This establishes a tangible sense of personal history.*
-
----
-
-## 27. Rewards
-
-Rewards should feel like a personal treasury rather than an ecommerce storefront.
-
-### Structure:
-```text
-TREASURY
-1,240 GOLD
-
-REWARDS
-30 MIN GAMING       120 GOLD
-ONE EPISODE         180 GOLD
-COFFEE BREAK        100 GOLD
-```
-
-*Keep cards clean and minimalist.*
-
----
-
-## 28. Inventory
-
-Inventory clearly communicates collection ownership.
-
-### Example:
-```text
-YOUR COLLECTION
-
-OWNED
-MIDNIGHT THEME      [ EQUIPPED ]
-CYBERPUNK THEME     [ OWNED ]
-STREAK SHIELD ×2
-```
-
-*The active theme must be visually obvious.*
-
----
-
-## 29. Theme System
-
-Dynamic themes function as cosmetic atmosphere modes rather than conflicting interface structures.
-
-### Supported Themes:
-1. **Default:** Obsidian (`#0c0d0f`) + Lime accent (`#d8ff55`).
-2. **Cyberpunk:** Cyan (`#06b6d4`) + Magenta (`#ec4899`) accents (used sparingly).
-3. **Midnight:** Obsidian (`#020305`) + Emerald (`#10b981`) / Silver.
-
-> **Rule:** All themes preserve identical layout, spacing, typography, usability, and accessibility.
-
----
-
-## 30. Microinteractions
-
-Animations should communicate direct cause and effect.
-
-- **Quest Completion:** Checkbox fill $\rightarrow$ XP counter increase $\rightarrow$ Progress bar update.
-- **Level Up:** XP crosses threshold $\rightarrow$ Brief screen pause $\rightarrow$ `LEVEL UP` fanfare $\rightarrow$ Attribute & title reveal.
-- **Reward Purchase:** Purchase click $\rightarrow$ Gold deductions $\rightarrow$ Item transitions into inventory.
-
-> *Avoid animation overload.*
-
----
-
-## 31. Audio Specifications
-
-Use procedural Web Audio API synthesis (zero external audio files).
-
-### Supported Events:
-- Quest completion chime
-- Level-up fanfare
-- Reward purchase coin drop
-
-### Audio Rules:
-- Defaults to appropriate accessibility behavior
-- User-controllable global mute toggle
-- Never autoplays aggressively
-- Respects mute state and reduced-motion preferences
-
----
-
-## 32. Motion Principles
-
-| Level | Duration | Target Actions |
-| :--- | :--- | :--- |
-| **Level 1 — Micro** | `100–180ms` | Hover states, buttons, checkboxes |
-| **Level 2 — UI** | `200–350ms` | Panels, dialogs, progress bars |
-| **Level 3 — Celebration** | `400–900ms` | Level-up celebrations, major achievements |
-
----
-
-## 33. Reduced Motion
-
-Respect `@media (prefers-reduced-motion: reduce)`:
-- Disable confetti particle bursts
-- Disable large transform shifts
-- Disable excessive shimmers & animated backgrounds
-- Keep essential state transitions understandable
-
----
-
-## 34. Responsive Design
-
-- **320px:** Single-column compact view.
-- **375–425px:** Optimized mobile quest experience.
-- **768px:** Tablet split layout.
-- **1024px:** Desktop navigation becomes persistent.
-- **1440px+:** Maximum content container of `1200px` (do not stretch content across entire ultrawide viewports).
-
----
-
-## 35. Accessibility (WCAG 2.1 AA)
-
-- Full keyboard navigation (`Tab`, `Shift+Tab`, `Enter`, `Space`, `Escape`)
-- Visible focus states
-- Semantic HTML5 structure
-- Proper form labels & accessible modals
-- Minimum text contrast ratio of **4.5:1** (higher for display headers)
-- Screen reader support (`aria-label`, semantic landmarks)
-- Reduced-motion compliance
-
----
-
-## 36. Component Design Rules
-
-Create and maintain reusable design primitives:
-- `Button`
-- `Input`
-- `ProgressBar`
-- `QuestItem`
-- `SectionHeader`
-- `Stat`
-- `AttributeRow`
-- `TimelineItem`
-- `Modal`
-- `Badge`
-- `NavigationItem`
-
-> *Do NOT create ad-hoc unique visual treatments for every page. Consistency stems from the primitive system.*
-
----
-
-## 37. Border Radius
-
-Use restrained rounding:
-- **Small Controls:** `6px`
-- **Cards & Panels:** `10px`
-- **Large Containers:** `14px`
-
-> *Avoid making everything `rounded-full`, `rounded-2xl`, or `rounded-3xl`. Full pills are reserved strictly for filters, statuses, and compact metadata.*
-
----
-
-## 38. Shadows & Elevation
-
-Use subtle elevation rather than giant glowing shadows:
-
-```css
-box-shadow: 0 8px 30px rgba(0, 0, 0, 0.20);
-```
-
-*Only elevated surfaces receive shadows.*
-
----
-
-## 39. Glassmorphism
-
-Glassmorphism effects should be rare and purposeful.
-
-- **Allowed:** Sidebar, floating mobile navigation, selected modal backdrops.
-- **Not Allowed:** Every card, every button, every section.
-
----
-
-## 40. Icons
-
-- Use icons only when they improve comprehension.
-- **Primary Library:** `Lucide React`.
-- Avoid decorative icon overload.
-- Do not use emojis as functional UI icons.
-
----
-
-## 41. Empty States
-
-Make all empty states actionable:
-
-```text
-NO ACTIVE QUESTS
-
-Your quest log is empty.
-Create something small. Build momentum.
-
-[ + CREATE QUEST ]
-```
-
----
-
-## 42. Error States
-
-Never leave users with raw or unexplained errors:
-
-```text
-COULDN'T COMPLETE QUEST
-
-Your progress wasn't changed.
-
-[ TRY AGAIN ]
-```
-
----
-
-## 43. Loading States
-
-- Use skeletons that match the exact target layout.
-- Do not display full-screen blocking spinners unless hydrating initial auth session.
-
----
-
-## 44. Copywriting & Voice
-
-METTLE language is concise, disciplined, and confident.
-
-### Prefer:
-- *"Build your mettle."*
-- *"Keep your streak alive."*
-- *"One quest at a time."*
-- *"Level up through action."*
-- *"Your progress is yours."*
-
-### Avoid:
-- *"Welcome back to your amazing productivity journey!"*
-- *"Let's crush your goals today!"*
-
-*(Avoid generic, noisy, or AI-sounding copy)*
-
----
-
-## 45. Dashboard Golden Rule
-
-When the user opens METTLE, the interface must answer within **5 seconds**:
-```
-WHO AM I?
-    ↓
-WHAT DO I NEED TO DO?
-    ↓
-WHAT WILL I GET?
-    ↓
-HOW AM I PROGRESSING?
-```
-
-*If the user cannot understand this immediately, simplify the interface.*
-
----
-
-## 46. Final Visual Quality Test
-
-Before approving any UI change, evaluate:
-1. *Does every element have a purpose?*
-2. *Is the hierarchy obvious?*
-3. *Is there too much decoration?*
-4. *Are there too many cards?*
-5. *Are there too many colors?*
-6. *Does it look like a template?*
-7. *Does it look like METTLE?*
-
-> **The final answer to "Does this look AI-generated?" must be an emphatic NO.**
-
----
-
-## 47. Implementation Requirement
-
-This design specification is an **authoritative implementation specification**:
-- Inspect the existing codebase.
-- Preserve working backend functionality.
-- Preserve existing API contracts.
-- Preserve database persistence.
-- Preserve authentication.
-- Preserve gamification logic.
-- Refactor frontend components cleanly.
-- Implement the new visual system.
-- Test every existing user flow.
-- Fix regressions.
-- Test responsive layouts and accessibility.
-- Run and verify the production build.
-
----
-
-## 48. Final Product Statement
-
-METTLE should ultimately feel like:
-
-> **"A personal character sheet for real life."**  
-> *(Not "another productivity dashboard with XP added to it.")*
-
-**The user's actions are the game.**  
-*The UI exists to make that progress visible, meaningful, and motivating.*
+## 11. Responsive Architecture & Accessibility
+
+- **Mobile First Navigation**: Segmented mobile bottom tab bar (`Dashboard`, `Quests`, `Character`, `Shop`, `Profile`).
+- **Full Keyboard Navigation**: Every interactive element supports `Tab`, `Enter`, and `Space`.
+- **WCAG 2.1 AA Compliant**: High-contrast ratios across both Light and Dark themes.

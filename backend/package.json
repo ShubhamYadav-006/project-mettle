@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js",
+    "dev": "nodemon --quiet server.js",
     "migrate": "node src/db/migrate.js"
   },
   "dependencies": {
@@ -15,7 +15,8 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
-    "pg": "^8.13.3"
+    "pg": "^8.13.3",
+    "resend": "^6.28.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"

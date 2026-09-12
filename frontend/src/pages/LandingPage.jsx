@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import api from '../utils/api';
 import {
   ArrowRight,
   Check,
@@ -21,11 +22,39 @@ export default function LandingPage({ onGetStarted, onLogin }) {
   const isDark = theme === 'dark';
   const [showcaseTab, setShowcaseTab] = useState('quests'); // 'quests' | 'stats' | 'rewards'
   const [progressionVisible, setProgressionVisible] = useState(false);
+  const [heroMounted, setHeroMounted] = useState(false);
+  const [howItWorksVisible, setHowItWorksVisible] = useState(false);
+  const [attributesVisible, setAttributesVisible] = useState(false);
   const progressionRef = useRef(null);
+  const howItWorksRef = useRef(null);
+  const attributesRef = useRef(null);
+
+  const [reducedMotion, setReducedMotion] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const handleChange = (e) => setReducedMotion(e.matches);
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setHeroMounted(true), 30);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setProgressionVisible(true);
+      setHowItWorksVisible(true);
+      setAttributesVisible(true);
       return;
     }
 
@@ -41,6 +70,54 @@ export default function LandingPage({ onGetStarted, onLogin }) {
 
     if (progressionRef.current) {
       observer.observe(progressionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  // IntersectionObserver for "How Mettle Works" section entrance
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setHowItWorksVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHowItWorksVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 }
+    );
+
+    if (howItWorksRef.current) {
+      observer.observe(howItWorksRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  // IntersectionObserver for "Attributes / Your Character" section entrance
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setAttributesVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setAttributesVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 }
+    );
+
+    if (attributesRef.current) {
+      observer.observe(attributesRef.current);
     }
 
     return () => observer.disconnect();
@@ -192,27 +269,58 @@ export default function LandingPage({ onGetStarted, onLogin }) {
       {/* Main Content */}
       <main>
         {/* 2. Hero Section */}
-        <section className="px-4 md:px-8 pt-12 md:pt-20 pb-16 md:pb-24 max-w-[1200px] mx-auto">
+        <section className="relative px-4 md:px-8 pt-12 md:pt-20 pb-16 md:pb-24 max-w-[1200px] mx-auto overflow-hidden">
+          {/* Subtle Ambient Background */}
+          <div
+            className="absolute inset-0 pointer-events-none -z-10 opacity-30 hero-bg-ambient"
+            aria-hidden="true"
+          >
+            <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-[radial-gradient(ellipse_at_center,rgba(181,227,74,0.06)_0%,transparent_70%)] rounded-full blur-3xl" />
+          </div>
+
           <div className="grid md:grid-cols-12 gap-10 lg:gap-12 items-center">
             {/* Left Column: Hero Narrative */}
             <div className="md:col-span-7 space-y-6 text-center md:text-left">
-
-
-              {/* Primary Single H1 */}
-              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black text-[var(--text-primary)] tracking-tight leading-[1.05]">
+              {/* Primary Single H1 - Step 1: Smooth fade-in + slight upward movement */}
+              <h1
+                className={`font-display text-4xl sm:text-5xl lg:text-6xl font-black text-[var(--text-primary)] tracking-tight leading-[1.05] transition-all duration-700 ease-out ${
+                  reducedMotion || heroMounted
+                    ? 'opacity-100 translate-y-0'
+                    : 'opacity-0 translate-y-4'
+                }`}
+              >
                 FORGE YOURSELF<br />
                 <span className="text-[var(--accent)]">THROUGH DAILY PROGRESS.</span>
               </h1>
 
-              <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed max-w-xl mx-auto md:mx-0">
+              {/* Supporting Description - Step 2: Staggered reveal */}
+              <p
+                className={`text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed max-w-xl mx-auto md:mx-0 transition-all duration-600 ease-out ${
+                  reducedMotion || heroMounted
+                    ? 'opacity-100 translate-y-0'
+                    : 'opacity-0 translate-y-3.5'
+                }`}
+                style={{
+                  transitionDelay: reducedMotion ? '0ms' : '150ms',
+                }}
+              >
                 Complete real-world quests, earn XP, build attributes, and level up the person you're becoming.
               </p>
 
-              {/* CTAs */}
-              <div className="flex flex-col sm:flex-row items-center gap-3 pt-2 justify-center md:justify-start">
+              {/* CTAs - Step 3: Staggered reveal + subtle hover scale & Electric Lime glow */}
+              <div
+                className={`flex flex-col sm:flex-row items-center gap-3 pt-2 justify-center md:justify-start transition-all duration-550 ease-out ${
+                  reducedMotion || heroMounted
+                    ? 'opacity-100 translate-y-0'
+                    : 'opacity-0 translate-y-3'
+                }`}
+                style={{
+                  transitionDelay: reducedMotion ? '0ms' : '300ms',
+                }}
+              >
                 <button
                   onClick={onGetStarted}
-                  className="w-full sm:w-auto px-6 py-3.5 rounded-sm bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-text)] font-sans font-bold text-sm uppercase tracking-wider active:scale-95 transition-all flex items-center justify-center gap-2 shadow-sm"
+                  className="w-full sm:w-auto px-6 py-3.5 rounded-sm bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-text)] font-sans font-bold text-sm uppercase tracking-wider hover:scale-[1.02] hero-cta-glow active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 shadow-sm"
                 >
                   <span>START YOUR JOURNEY</span>
                   <ArrowRight className="h-4 w-4 stroke-[2.5]" />
@@ -220,17 +328,24 @@ export default function LandingPage({ onGetStarted, onLogin }) {
 
                 <button
                   onClick={() => scrollToSection('how-it-works')}
-                  className="w-full sm:w-auto px-6 py-3.5 rounded-sm bg-[var(--bg-surface)] hover:bg-[var(--bg-elevated)] border border-[var(--border-strong)] text-[var(--text-primary)] font-sans font-semibold text-sm uppercase tracking-wider transition-all"
+                  className="w-full sm:w-auto px-6 py-3.5 rounded-sm bg-[var(--bg-surface)] hover:bg-[var(--bg-elevated)] border border-[var(--border-strong)] text-[var(--text-primary)] font-sans font-semibold text-sm uppercase tracking-wider hover:scale-[1.01] active:scale-95 transition-all duration-200"
                 >
                   SEE HOW IT WORKS
                 </button>
               </div>
-
-
             </div>
 
-            {/* Right Column: Life RPG Character Progression Screen */}
-            <div className="md:col-span-5">
+            {/* Right Column: Life RPG Character Progression Screen - Step 4: Staggered reveal */}
+            <div
+              className={`md:col-span-5 transition-all duration-750 ease-out ${
+                reducedMotion || heroMounted
+                  ? 'opacity-100 translate-y-0'
+                  : 'opacity-0 translate-y-5'
+              }`}
+              style={{
+                transitionDelay: reducedMotion ? '0ms' : '450ms',
+              }}
+            >
               <div className="mettle-panel rounded-md p-5 sm:p-6 bg-[var(--bg-surface)] border border-[var(--border)] shadow-md space-y-4">
                 {/* Character Header & Tabs */}
                 <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
@@ -291,8 +406,18 @@ export default function LandingPage({ onGetStarted, onLogin }) {
                     </span>
                   </div>
 
+                  {/* Animated XP Progress Bar */}
                   <div className="w-full h-2 rounded-sm bg-[var(--bg-elevated)] overflow-hidden border border-[var(--border)]">
-                    <div className="h-full bg-[var(--accent)] w-[83%] transition-all duration-500" />
+                    <div
+                      className={`h-full bg-[var(--accent)] transition-all duration-1000 ease-out ${
+                        reducedMotion || heroMounted
+                          ? 'w-[83%] xp-bar-glow'
+                          : 'w-0'
+                      }`}
+                      style={{
+                        transitionDelay: reducedMotion ? '0ms' : '550ms',
+                      }}
+                    />
                   </div>
                 </div>
 
@@ -392,22 +517,42 @@ export default function LandingPage({ onGetStarted, onLogin }) {
         </section>
 
         {/* 3. How Mettle Works Section */}
-        <section id="how-it-works" className="px-4 md:px-8 py-16 md:py-20 border-t border-[var(--border)] bg-[var(--bg-secondary)]">
+        <section
+          id="how-it-works"
+          ref={howItWorksRef}
+          className="px-4 md:px-8 py-16 md:py-20 border-t border-[var(--border)] bg-[var(--bg-secondary)] overflow-hidden"
+        >
           <div className="max-w-[1200px] mx-auto space-y-10">
-            <div className="text-center max-w-2xl mx-auto space-y-2">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--accent)]">
-                HOW METTLE WORKS
+            {/* Section Heading & Subtitle */}
+            <div
+              className={`text-center max-w-2xl mx-auto space-y-2 transition-all duration-700 ease-out ${
+                reducedMotion || howItWorksVisible
+                  ? 'opacity-100 translate-y-0'
+                  : 'opacity-0 translate-y-4'
+              }`}
+            >
+              <span className="text-[10px] font-bold tracking-widest text-[var(--accent)] uppercase">
+                How Mettle Works
               </span>
               <h2 className="font-display text-3xl sm:text-4xl font-black text-[var(--text-primary)]">
                 DO. EARN. GROW.
               </h2>
-              <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
+              <p
+                className={`text-xs sm:text-sm text-[var(--text-secondary)] transition-all duration-600 ease-out ${
+                  reducedMotion || howItWorksVisible
+                    ? 'opacity-100 translate-y-0'
+                    : 'opacity-0 translate-y-3'
+                }`}
+                style={{
+                  transitionDelay: reducedMotion ? '0ms' : '100ms',
+                }}
+              >
                 Complete real-life quests, earn XP, improve your stats, and level up.
               </p>
             </div>
 
-            {/* 4 Simplified Step Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* 4 Simplified Step Cards with Connecting Flow */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative">
               {[
                 {
                   step: '01',
@@ -432,28 +577,72 @@ export default function LandingPage({ onGetStarted, onLogin }) {
                   title: 'GROW & LEVEL UP',
                   desc: 'Use your progress to grow your stats and reach the next level.',
                   icon: TrendingUp,
+                  isFinal: true,
                 },
               ].map((card, i) => {
                 const CardIcon = card.icon;
+                const cardDelay = reducedMotion ? 0 : 150 + i * 120; // 150ms, 270ms, 390ms, 510ms
+                const isLevelUp = card.isFinal;
+
                 return (
-                  <div
-                    key={i}
-                    className="mettle-panel rounded-md p-5 sm:p-6 bg-[var(--bg-surface)] border border-[var(--border)] hover:border-[var(--accent)] transition-all duration-200 space-y-3 group"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-display text-sm font-black text-[var(--accent)]">
-                        {card.step}
-                      </span>
-                      <div className="h-7 w-7 rounded-sm bg-[var(--bg-elevated)] border border-[var(--border)] flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--accent)] group-hover:border-[var(--accent-border)] transition-colors">
-                        <CardIcon className="h-3.5 w-3.5" />
+                  <div key={i} className="relative group">
+                    <div
+                      className={`mettle-panel rounded-md p-5 sm:p-6 bg-[var(--bg-surface)] border border-[var(--border)] hover:border-[var(--accent)] transition-all duration-500 ease-out space-y-3 h-full ${
+                        isLevelUp && (reducedMotion || howItWorksVisible)
+                          ? 'step-levelup-glow'
+                          : ''
+                      } ${
+                        reducedMotion || howItWorksVisible
+                          ? 'opacity-100 translate-y-0'
+                          : 'opacity-0 translate-y-5'
+                      }`}
+                      style={{
+                        transitionDelay: `${cardDelay}ms`,
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-display text-sm font-black text-[var(--accent)]">
+                          {card.step}
+                        </span>
+                        <div
+                          className={`h-7 w-7 rounded-sm bg-[var(--bg-elevated)] border border-[var(--border)] flex items-center justify-center text-[var(--text-secondary)] group-hover:text-[var(--accent)] group-hover:border-[var(--accent-border)] group-hover:scale-105 transition-all duration-200 ${
+                            reducedMotion || howItWorksVisible
+                              ? 'scale-100 opacity-100'
+                              : 'scale-95 opacity-0'
+                          }`}
+                          style={{
+                            transitionDelay: `${cardDelay + 50}ms`,
+                          }}
+                        >
+                          <CardIcon className="h-3.5 w-3.5" />
+                        </div>
                       </div>
+                      <h3 className="font-display text-sm font-black text-[var(--text-primary)] uppercase tracking-wide">
+                        {card.title}
+                      </h3>
+                      <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                        {card.desc}
+                      </p>
                     </div>
-                    <h3 className="font-display text-sm font-black text-[var(--text-primary)] uppercase tracking-wide">
-                      {card.title}
-                    </h3>
-                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                      {card.desc}
-                    </p>
+
+                    {/* Desktop Sequential Connecting Flow between cards */}
+                    {i < 3 && (
+                      <div
+                        className="hidden lg:block absolute -right-2 top-1/2 -translate-y-1/2 z-10 w-4 overflow-hidden pointer-events-none"
+                        aria-hidden="true"
+                      >
+                        <div
+                          className={`h-0.5 bg-[var(--accent)] transition-all duration-300 ease-out ${
+                            reducedMotion || howItWorksVisible
+                              ? 'w-full opacity-80 shadow-[0_0_6px_rgba(181,227,74,0.6)]'
+                              : 'w-0 opacity-0'
+                          }`}
+                          style={{
+                            transitionDelay: reducedMotion ? '0ms' : `${cardDelay + 100}ms`,
+                          }}
+                        />
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -462,18 +651,44 @@ export default function LandingPage({ onGetStarted, onLogin }) {
         </section>
 
         {/* 4. Attributes Section */}
-        <section id="attributes" className="px-4 md:px-8 py-16 md:py-20 border-t border-[var(--border)]">
+        <section
+          id="attributes"
+          ref={attributesRef}
+          className="px-4 md:px-8 py-16 md:py-20 border-t border-[var(--border)] overflow-hidden"
+        >
           <div className="max-w-[1200px] mx-auto grid md:grid-cols-12 gap-10 items-center">
             {/* Left Column: Heading + Explanation + 5 Attributes */}
             <div className="md:col-span-6 space-y-6">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--accent)]">
+                <span
+                  className={`text-[10px] font-bold uppercase tracking-widest text-[var(--accent)] block transition-opacity duration-500 ease-out ${
+                    reducedMotion || attributesVisible ? 'opacity-100' : 'opacity-0'
+                  }`}
+                >
                   YOUR CHARACTER
                 </span>
-                <h2 className="font-display text-3xl sm:text-4xl font-black text-[var(--text-primary)] mt-1">
+                <h2
+                  className={`font-display text-3xl sm:text-4xl font-black text-[var(--text-primary)] mt-1 transition-all duration-600 ease-out ${
+                    reducedMotion || attributesVisible
+                      ? 'opacity-100 translate-y-0'
+                      : 'opacity-0 translate-y-[15px]'
+                  }`}
+                  style={{
+                    transitionDelay: reducedMotion ? '0ms' : '50ms',
+                  }}
+                >
                   GROW IN EVERY PART OF LIFE.
                 </h2>
-                <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-2 leading-relaxed">
+                <p
+                  className={`text-xs sm:text-sm text-[var(--text-secondary)] mt-2 leading-relaxed transition-all duration-600 ease-out ${
+                    reducedMotion || attributesVisible
+                      ? 'opacity-100 translate-y-0'
+                      : 'opacity-0 translate-y-[12px]'
+                  }`}
+                  style={{
+                    transitionDelay: reducedMotion ? '0ms' : '150ms',
+                  }}
+                >
                   Every quest helps you improve a different part of yourself.
                 </p>
               </div>
@@ -485,22 +700,60 @@ export default function LandingPage({ onGetStarted, onLogin }) {
                   { name: 'BODY', color: 'var(--attr-body)', desc: 'Fitness, exercise and staying active.' },
                   { name: 'CRAFT', color: 'var(--attr-craft)', desc: 'Building, creating, writing and designing.' },
                   { name: 'HABIT', color: 'var(--attr-habit)', desc: 'Consistency and keeping your streak going.' },
-                ].map((attr, i) => (
-                  <div key={i} className="p-3 rounded-sm bg-[var(--bg-surface)] border border-[var(--border)] flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: attr.color }} />
-                      <h3 className="font-display text-xs font-black uppercase shrink-0" style={{ color: attr.color }}>
-                        {attr.name}
-                      </h3>
-                      <span className="text-xs text-[var(--text-secondary)]">{attr.desc}</span>
+                ].map((attr, i) => {
+                  const cardDelay = reducedMotion ? 0 : 200 + i * 100; // 200ms, 300ms, 400ms, 500ms, 600ms
+                  return (
+                    <div
+                      key={i}
+                      className={`group p-3 rounded-sm bg-[var(--bg-surface)] border border-[var(--border)] hover:border-[var(--border-strong)] hover:bg-[var(--bg-elevated)] flex items-center justify-between transition-all duration-500 ease-out ${
+                        reducedMotion || attributesVisible
+                          ? 'opacity-100 translate-y-0'
+                          : 'opacity-0 translate-y-[15px]'
+                      }`}
+                      style={{
+                        transitionDelay: `${cardDelay}ms`,
+                      }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span
+                          className={`w-2.5 h-2.5 rounded-full shrink-0 transition-all duration-400 ease-out group-hover:scale-125 ${
+                            reducedMotion || attributesVisible
+                              ? 'scale-100 opacity-100'
+                              : 'scale-75 opacity-0'
+                          }`}
+                          style={{
+                            backgroundColor: attr.color,
+                            transitionDelay: `${cardDelay + 50}ms`,
+                            boxShadow: `0 0 6px ${attr.color}40`,
+                          }}
+                        />
+                        <h3
+                          className="font-display text-xs font-black uppercase shrink-0 tracking-wide"
+                          style={{ color: attr.color }}
+                        >
+                          {attr.name}
+                        </h3>
+                        <span className="text-xs text-[var(--text-secondary)]">{attr.desc}</span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
             {/* Right Column: Radar Chart Preview Card */}
-            <div className="md:col-span-6 flex flex-col items-center justify-center p-6 mettle-panel rounded-md bg-[var(--bg-surface)] border border-[var(--border)] shadow-sm space-y-3">
+            <div
+              className={`md:col-span-6 flex flex-col items-center justify-center p-6 mettle-panel rounded-md bg-[var(--bg-surface)] border shadow-sm space-y-3 transition-all duration-700 ease-out ${
+                reducedMotion || attributesVisible
+                  ? 'opacity-100 translate-y-0 scale-100'
+                  : 'opacity-0 translate-y-[15px] scale-[0.97]'
+              } ${
+                (reducedMotion || attributesVisible) ? 'step-levelup-glow border-[var(--accent-border)]' : 'border-[var(--border)]'
+              }`}
+              style={{
+                transitionDelay: reducedMotion ? '0ms' : '250ms',
+              }}
+            >
               <div className="flex items-center justify-between w-full border-b border-[var(--border)] pb-2.5 px-2">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-primary)]">
                   YOUR PROGRESS
@@ -509,7 +762,16 @@ export default function LandingPage({ onGetStarted, onLogin }) {
                   Example Progress
                 </span>
               </div>
-              <div className="scale-90 origin-center -my-2">
+              <div
+                className={`origin-center -my-2 transition-all duration-1000 ease-out ${
+                  reducedMotion || attributesVisible
+                    ? 'scale-90 opacity-100'
+                    : 'scale-75 opacity-0'
+                }`}
+                style={{
+                  transitionDelay: reducedMotion ? '0ms' : '400ms',
+                }}
+              >
                 <RadarChart attributes={demoAttributes} />
               </div>
             </div>
@@ -657,67 +919,18 @@ export default function LandingPage({ onGetStarted, onLogin }) {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[var(--border)] py-10 px-4 md:px-8 bg-[var(--bg-primary)] text-xs">
-        <div className="max-w-[1200px] mx-auto space-y-8">
-          {/* Main Footer Row */}
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
-            {/* Left: Brand + Tagline */}
-            <div className="space-y-1 text-center sm:text-left">
-              <button
-                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                className="font-display text-base font-bold tracking-tight text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] rounded-sm"
-              >
-                Mettle
-              </button>
-              <p className="text-xs text-[var(--text-secondary)] font-sans">
-                "Build yourself. Level by level."
-              </p>
-            </div>
-
-            {/* Right: Product Navigation */}
-            <div className="space-y-2 text-center sm:text-right">
-              <span className="text-[11px] font-sans font-bold uppercase tracking-wider text-[var(--text-muted)] block">
-                Product
-              </span>
-              <nav className="flex flex-wrap justify-center sm:justify-end gap-x-5 gap-y-2 text-xs font-sans font-semibold text-[var(--text-secondary)]">
-                <a
-                  href="#how-it-works"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection('how-it-works');
-                  }}
-                  className="hover:text-[var(--text-primary)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] rounded-sm"
-                >
-                  How It Works
-                </a>
-                <a
-                  href="#attributes"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection('attributes');
-                  }}
-                  className="hover:text-[var(--text-primary)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] rounded-sm"
-                >
-                  Attributes
-                </a>
-                <a
-                  href="#rewards"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection('rewards');
-                  }}
-                  className="hover:text-[var(--text-primary)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] rounded-sm"
-                >
-                  Rewards
-                </a>
-              </nav>
-            </div>
+      <footer className="border-t border-[var(--border)] py-6 sm:py-8 px-4 sm:px-6 md:px-8 bg-[var(--bg-primary)] text-[var(--text-secondary)]">
+        <div className="max-w-[1200px] mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h2 className="font-display text-base sm:text-lg font-black tracking-wider text-[var(--text-primary)]">
+              Mettle
+            </h2>
+            <p className="text-xs sm:text-sm text-[var(--text-secondary)] font-sans mt-0.5">
+              Build yourself. Level by level.
+            </p>
           </div>
-
-          {/* Bottom Row */}
-          <div className="pt-6 border-t border-[var(--border)] flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-[var(--text-muted)] font-sans">
-            <span>© 2026 Mettle</span>
-            <span>Built for real-world progress.</span>
+          <div className="text-xs sm:text-sm text-[var(--text-secondary)] font-sans sm:text-right">
+            © 2026 Mettle
           </div>
         </div>
       </footer>

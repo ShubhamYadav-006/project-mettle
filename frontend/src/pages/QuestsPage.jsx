@@ -15,7 +15,7 @@ const CATEGORIES = [
 ];
 
 export default function QuestsPage({ onOpenCreateModal, isCreateModalOpen, setIsCreateModalOpen }) {
-  const { updateCharacterState } = useAuth();
+  const { user, updateCharacterState } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [history, setHistory] = useState([]);
   const [activeTab, setActiveTab] = useState('active'); // 'active' | 'history'
@@ -24,6 +24,7 @@ export default function QuestsPage({ onOpenCreateModal, isCreateModalOpen, setIs
   const [selectedQuest, setSelectedQuest] = useState(null);
 
   const fetchTasks = async () => {
+    if (!user) return;
     try {
       setLoading(true);
       const res = await api.get('/tasks');
@@ -31,13 +32,18 @@ export default function QuestsPage({ onOpenCreateModal, isCreateModalOpen, setIs
         setTasks(res.data.data);
       }
     } catch (err) {
-      console.error(err);
+      const isAuthErr =
+        err?.message?.includes('Access denied') ||
+        err?.message?.includes('expired') ||
+        err?.message?.includes('token');
+      if (user && !isAuthErr) console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
   const fetchHistory = async () => {
+    if (!user) return;
     try {
       setLoading(true);
       const res = await api.get('/tasks/history');
@@ -45,19 +51,25 @@ export default function QuestsPage({ onOpenCreateModal, isCreateModalOpen, setIs
         setHistory(res.data.data);
       }
     } catch (err) {
-      console.error(err);
+      const isAuthErr =
+        err?.message?.includes('Access denied') ||
+        err?.message?.includes('expired') ||
+        err?.message?.includes('token');
+      if (user && !isAuthErr) console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (activeTab === 'active') {
-      fetchTasks();
-    } else {
-      fetchHistory();
+    if (user) {
+      if (activeTab === 'active') {
+        fetchTasks();
+      } else {
+        fetchHistory();
+      }
     }
-  }, [activeTab]);
+  }, [activeTab, user]);
 
   const handleComplete = async (taskId) => {
     try {

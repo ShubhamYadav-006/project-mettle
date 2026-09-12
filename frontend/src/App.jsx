@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import MobileNav from './components/MobileNav';
+import Footer from './components/Footer';
 import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
 import DashboardPage from './pages/DashboardPage';
@@ -63,7 +64,7 @@ function AppContent() {
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
         {/* Main Content Area */}
-        <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto w-full">
+        <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto w-full min-w-0">
           {activeTab === 'dashboard' && (
             <DashboardPage
               setActiveTab={setActiveTab}
@@ -88,6 +89,9 @@ function AppContent() {
           {activeTab === 'profile' && <ProfilePage />}
         </main>
       </div>
+
+      {/* Global Footer */}
+      <Footer activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {/* Mobile Bottom Navigation */}
       <MobileNav

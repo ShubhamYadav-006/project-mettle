@@ -6,11 +6,11 @@ import React from 'react';
  */
 export default function RadarChart({ attributes }) {
   const stats = [
-    { label: 'Mind', key: 'intellect', value: attributes?.intellect ?? 10, color: 'var(--attr-mind, #5B8DEF)' },
-    { label: 'Will', key: 'discipline', value: attributes?.discipline ?? 10, color: 'var(--attr-will, #B5E34A)' },
-    { label: 'Body', key: 'strength', value: attributes?.strength ?? 10, color: 'var(--attr-body, #3FA56F)' },
-    { label: 'Craft', key: 'creativity', value: attributes?.creativity ?? 10, color: 'var(--attr-craft, #9B7AC7)' },
-    { label: 'Habit', key: 'consistency', value: attributes?.consistency ?? 10, color: 'var(--attr-habit, #C99628)' },
+    { label: 'Intellect', key: 'intellect', value: attributes?.intellect ?? 10, color: 'var(--attr-mind, #5B8DEF)' },
+    { label: 'Discipline', key: 'discipline', value: attributes?.discipline ?? 10, color: 'var(--attr-will, #B5E34A)' },
+    { label: 'Strength', key: 'strength', value: attributes?.strength ?? 10, color: 'var(--attr-body, #3FA56F)' },
+    { label: 'Creativity', key: 'creativity', value: attributes?.creativity ?? 10, color: 'var(--attr-craft, #9B7AC7)' },
+    { label: 'Consistency', key: 'consistency', value: attributes?.consistency ?? 10, color: 'var(--attr-habit, #C99628)' },
   ];
 
   const size = 280;

@@ -164,6 +164,40 @@
   background: var(--text-muted);
 }
 
+/* Hero Section Subtle Ambient Drift & Glow */
+@keyframes heroGridDrift {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, 6px, 0);
+  }
+}
+
+.hero-bg-ambient {
+  animation: heroGridDrift 14s ease-in-out infinite;
+  will-change: transform;
+}
+
+.xp-bar-glow {
+  box-shadow: 0 0 10px rgba(181, 227, 74, 0.45);
+}
+
+.hero-cta-glow:hover {
+  box-shadow: 0 0 20px rgba(181, 227, 74, 0.28);
+}
+
+/* How Mettle Works Step Cards & Connectors */
+.step-levelup-glow {
+  box-shadow: 0 0 18px rgba(181, 227, 74, 0.16);
+  border-color: rgba(181, 227, 74, 0.35);
+}
+
+.step-levelup-glow:hover {
+  box-shadow: 0 0 24px rgba(181, 227, 74, 0.28);
+  border-color: var(--accent);
+}
+
 /* Reduced Motion Compliance */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {

@@ -73,24 +73,15 @@ const registerUser = async ({ name, email, password }) => {
 
     const attributes = attributeResult.rows[0];
 
-    // 4. Insert Initial Streaks Record with freeze_count = 0
+    // 4. Insert Initial Streaks Record with Day 1 active
     const streakResult = await client.query(
-      `INSERT INTO streaks (user_id, current_streak, longest_streak, freeze_count)
-       VALUES ($1, 0, 0, 0)
+      `INSERT INTO streaks (user_id, current_streak, longest_streak, freeze_count, last_activity_date)
+       VALUES ($1, 1, 1, 0, CURRENT_DATE)
        RETURNING current_streak, longest_streak, last_activity_date, freeze_count`,
       [user.id]
     );
 
     const streaks = streakResult.rows[0];
-
-    // 5. Insert 2 Curated Starter Quests to eliminate blank canvas
-    await client.query(
-      `INSERT INTO tasks (user_id, title, description, category, difficulty, xp_reward, gold_reward, attribute_type, status)
-       VALUES 
-       ($1, 'Complete 45-min Deep Focus Session', 'Review syllabus concepts and solve practical problems.', 'academics', 'medium', 60, 20, 'intellect', 'pending'),
-       ($1, 'Morning Planning & Routine Adherence', 'Organize daily priorities and set today goals.', 'routine', 'easy', 30, 10, 'discipline', 'pending')`,
-      [user.id]
-    );
 
     await client.query('COMMIT');
 
@@ -401,23 +392,20 @@ const handleGoogleAuthCallback = async (code) => {
         [characterId]
       );
 
-      // Create Streaks Record
+      // Create Streaks Record with Day 1 active
       await client.query(
-        `INSERT INTO streaks (user_id, current_streak, longest_streak, freeze_count)
-         VALUES ($1, 0, 0, 0)`,
-        [userId]
-      );
-
-      // Insert Starter Quests
-      await client.query(
-        `INSERT INTO tasks (user_id, title, description, category, difficulty, xp_reward, gold_reward, attribute_type, status)
-         VALUES 
-         ($1, 'Complete 45-min Deep Focus Session', 'Review syllabus concepts and solve practical problems.', 'academics', 'medium', 60, 20, 'intellect', 'pending'),
-         ($1, 'Morning Planning & Routine Adherence', 'Organize daily priorities and set today goals.', 'routine', 'easy', 30, 10, 'discipline', 'pending')`,
+        `INSERT INTO streaks (user_id, current_streak, longest_streak, freeze_count, last_activity_date)
+         VALUES ($1, 1, 1, 0, CURRENT_DATE)`,
         [userId]
       );
 
       await client.query('COMMIT');
+
+      // Send Welcome Email asynchronously for newly registered Google user
+      const { sendWelcomeEmail } = require('./emailService');
+      sendWelcomeEmail({ email: newUser.email, name: newUser.name }).catch((err) => {
+        console.error('[AuthService] Google OAuth welcome email error:', err?.message || err);
+      });
     } catch (err) {
       await client.query('ROLLBACK');
       throw err;
@@ -430,10 +418,23 @@ const handleGoogleAuthCallback = async (code) => {
   return await getUserProfile(userId);
 };
 
+/**
+ * Get public platform stats (total registered adventurers)
+ */
+const getPublicStats = async () => {
+  const userCountRes = await query('SELECT COUNT(*) AS total_users FROM users');
+  const questCountRes = await query('SELECT COUNT(*) AS total_completed FROM task_completions');
+  return {
+    totalUsers: parseInt(userCountRes.rows[0]?.total_users || 0, 10),
+    totalCompletedQuests: parseInt(questCountRes.rows[0]?.total_completed || 0, 10),
+  };
+};
+
 module.exports = {
   registerUser,
   loginUser,
   getUserProfile,
   getGoogleAuthUrl,
   handleGoogleAuthCallback,
+  getPublicStats,
 };

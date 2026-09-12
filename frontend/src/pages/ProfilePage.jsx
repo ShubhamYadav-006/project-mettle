@@ -39,7 +39,7 @@ export default function ProfilePage() {
     createdAt: user?.createdAt || user?.created_at || '',
   });
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -55,12 +55,26 @@ export default function ProfilePage() {
 
   const fileInputRef = useRef(null);
 
+  // Sync profileData with user context whenever user changes
+  useEffect(() => {
+    if (user) {
+      setProfileData((prev) => ({
+        name: user.name ?? prev.name,
+        username: user.username ?? prev.username,
+        email: user.email ?? prev.email,
+        bio: user.bio ?? prev.bio,
+        avatarUrl: user.avatarUrl ?? user.avatar_url ?? prev.avatarUrl,
+        createdAt: user.createdAt ?? user.created_at ?? prev.createdAt,
+      }));
+    }
+  }, [user]);
+
   // Fetch verified profile from backend on component mount
   const fetchProfile = async () => {
+    if (!user) return;
     try {
-      setLoading(true);
       const res = await api.get('/profile');
-      if (res.data.success) {
+      if (res.data?.success && res.data?.data?.user) {
         const u = res.data.data.user;
         const normalized = {
           name: u.name || '',
@@ -74,15 +88,19 @@ export default function ProfilePage() {
         updateUserProfile(normalized);
       }
     } catch (err) {
-      console.error('Failed to load profile:', err);
-    } finally {
-      setLoading(false);
+      const isAuthErr =
+        err?.message?.includes('Access denied') ||
+        err?.message?.includes('expired') ||
+        err?.message?.includes('token');
+      if (user && !isAuthErr) console.error('Failed to load profile:', err);
     }
   };
 
   useEffect(() => {
-    fetchProfile();
-  }, []);
+    if (user) {
+      fetchProfile();
+    }
+  }, [user]);
 
   const handleOpenEdit = () => {
     setEditName(profileData.name);
