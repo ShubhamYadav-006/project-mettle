@@ -1,11 +1,11 @@
 /**
  * Frontend Non-Linear Level Progression Utility
- * Formula: Required Cumulative XP for Level N = Math.round(100 * (N - 1)^1.5)
+ * Formula: Required Cumulative XP for Level N = Math.round(250 * (N - 1)^1.5)
  */
 
 export const getXpForLevel = (level) => {
   if (level <= 1) return 0;
-  return Math.round(100 * Math.pow(level - 1, 1.5));
+  return Math.round(250 * Math.pow(level - 1, 1.5));
 };
 
 export const calculateLevel = (totalXp) => {

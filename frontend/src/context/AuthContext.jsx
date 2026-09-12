@@ -41,6 +41,23 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // RPG Equipped Skin Theme ('default' | 'theme-cyberpunk' | 'theme-midnight')
+  const [activeTheme, setActiveThemeState] = useState(() => {
+    try {
+      return localStorage.getItem('mettle-active-theme') || 'default';
+    } catch (e) {
+      return 'default';
+    }
+  });
+
+  const setActiveTheme = (newTheme) => {
+    const val = newTheme || 'default';
+    setActiveThemeState(val);
+    try {
+      localStorage.setItem('mettle-active-theme', val);
+    } catch (e) {}
+  };
+
   // Check current user session on mount (including handling OAuth redirect tokens)
   const checkAuth = async () => {
     try {
@@ -180,6 +197,8 @@ export const AuthProvider = ({ children }) => {
         theme,
         toggleTheme,
         setTheme,
+        activeTheme,
+        setActiveTheme,
       }}
     >
       {children}

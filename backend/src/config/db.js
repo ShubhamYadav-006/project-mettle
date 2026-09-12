@@ -8,9 +8,14 @@ if (!connectionString) {
   process.exit(1);
 }
 
-// Normalize SSL query params for pg driver to avoid Node pg deprecation warnings
+// Normalize SSL and connection params for pg driver with Neon serverless PostgreSQL
 if (connectionString.includes('sslmode=require')) {
   connectionString = connectionString.replace('sslmode=require', 'sslmode=verify-full');
+}
+// Strip channel_binding parameter as pg driver does not support SCRAM channel binding on Node
+connectionString = connectionString.replace(/[?&]channel_binding=[^&]+/g, (match) => match.startsWith('?') ? '?' : '');
+if (connectionString.endsWith('?') || connectionString.endsWith('&')) {
+  connectionString = connectionString.slice(0, -1);
 }
 
 // Configure PostgreSQL connection pool for Neon serverless PostgreSQL
@@ -39,7 +44,9 @@ const query = async (text, params) => {
   try {
     return await pool.query(text, params);
   } catch (err) {
-    if (err.message && err.message.includes('Connection terminated')) {
+    if (err.message && (err.message.includes('Connection terminated') || err.message.includes('connection timeout'))) {
+      // Allow brief backoff for Neon serverless pool reconnection
+      await new Promise((resolve) => setTimeout(resolve, 200));
       return await pool.query(text, params);
     }
     throw err;
