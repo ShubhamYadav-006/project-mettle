@@ -1,0 +1,175 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* LIGHT MODE — DEFAULT (Monochrome + Lime) */
+  --bg-primary: #F7F7F7;
+  --bg-secondary: #F1F1F1;
+  --bg-surface: #FFFFFF;
+  --bg-elevated: #FFFFFF;
+
+  --text-primary: #111111;
+  --text-secondary: #5F5F5F;
+  --text-muted: #8A8A8A;
+
+  --accent: #B5E34A;
+  --accent-hover: #A4D13D;
+  --accent-text: #111111;
+  --accent-soft: rgba(181, 227, 74, 0.12);
+  --accent-border: rgba(181, 227, 74, 0.35);
+
+  --border: #E2E2E2;
+  --border-strong: #CCCCCC;
+
+  --success: #3FA56F;
+  --warning: #C99628;
+  --danger: #D95C55;
+  --info: #5B8DEF;
+
+  --xp: #B5E34A;
+  --gold: #C99628;
+
+  /* Aliases for token compatibility */
+  --color-bg: var(--bg-primary);
+  --color-surface: var(--bg-surface);
+  --color-surface-raised: var(--bg-elevated);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-border: var(--accent-border);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  /* Attribute palette (Subtle indicators) */
+  --attr-mind: #5B8DEF;
+  --attr-will: #B5E34A;
+  --attr-body: #3FA56F;
+  --attr-craft: #9B7AC7;
+  --attr-habit: #C99628;
+}
+
+.dark {
+  /* DARK MODE (Monochrome + Lime) */
+  --bg-primary: #0D0D0D;
+  --bg-secondary: #141414;
+  --bg-surface: #1A1A1A;
+  --bg-elevated: #222222;
+
+  --text-primary: #F5F5F5;
+  --text-secondary: #A6A6A6;
+  --text-muted: #707070;
+
+  --accent: #B5E34A;
+  --accent-hover: #C5F05C;
+  --accent-text: #0D0D0D;
+  --accent-soft: rgba(181, 227, 74, 0.10);
+  --accent-border: rgba(181, 227, 74, 0.25);
+
+  --border: #2A2A2A;
+  --border-strong: #3A3A3A;
+
+  --success: #65C99A;
+  --warning: #E6B84D;
+  --danger: #F27A72;
+  --info: #5B8DEF;
+
+  --xp: #B5E34A;
+  --gold: #E6B84D;
+
+  --color-bg: var(--bg-primary);
+  --color-surface: var(--bg-surface);
+  --color-surface-raised: var(--bg-elevated);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-border: var(--accent-border);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  /* Attribute palette (Dark mode) */
+  --attr-mind: #6E9AC4;
+  --attr-will: #B5E34A;
+  --attr-body: #65C99A;
+  --attr-craft: #B18CFF;
+  --attr-habit: #E6B84D;
+}
+
+@layer base {
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background-color: var(--accent-soft);
+    color: var(--text-primary);
+  }
+}
+
+/* Restrained Panels and Structural Surfaces */
+.mettle-panel {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.dark .mettle-panel {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.20);
+}
+
+.mettle-panel-raised {
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+}
+
+.mettle-panel-interactive {
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+}
+
+.mettle-panel-interactive:hover {
+  background-color: var(--bg-elevated);
+  border-color: var(--border-strong);
+}
+
+/* Clean Minimal Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Reduced Motion Compliance */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
