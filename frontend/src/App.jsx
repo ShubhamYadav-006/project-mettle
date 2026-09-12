@@ -52,7 +52,7 @@ function AppContent() {
   const themeClass = activeTheme && activeTheme !== 'default' ? activeTheme : '';
 
   return (
-    <div className={`min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)] pb-16 lg:pb-0 transition-colors duration-200 ${themeClass}`}>
+    <div className={`min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)] pb-[calc(4rem+env(safe-area-inset-bottom,0px))] lg:pb-0 transition-colors duration-200 ${themeClass}`}>
       {/* Top Navbar */}
       <Navbar
         activeTab={activeTab}

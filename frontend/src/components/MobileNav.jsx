@@ -13,7 +13,7 @@ export default function MobileNav({ activeTab, setActiveTab, onOpenCreateModal }
   ];
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--border)] bg-[var(--bg-primary)]/95 backdrop-blur-md px-3 py-2 flex items-center justify-around">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--border)] bg-[var(--bg-primary)]/95 backdrop-blur-md px-3 pt-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] flex items-center justify-around">
       {leftItems.map((item) => {
         const Icon = item.icon;
         const isActive = activeTab === item.id;
