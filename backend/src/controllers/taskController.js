@@ -1,6 +1,4 @@
 const taskService = require('../services/taskService');
-const { sendLevelUpEmail } = require('../services/emailService');
-const { query } = require('../config/db');
 
 /**
  * @desc    Get all quests for logged in user
@@ -96,38 +94,6 @@ const completeTask = async (req, res, next) => {
   try {
     const notes = req.body?.notes || '';
     const result = await taskService.completeTask(req.user.id, req.params.id, notes);
-
-    // If character leveled up, dispatch level-up email in the background without blocking
-    if (result.character?.leveledUp) {
-      const newLevel = result.character.level;
-      const oldLevel = result.character.level - (result.character.levelJump || 1);
-
-      (async () => {
-        try {
-          let email = req.user.email;
-          let name = req.user.name;
-
-          if (!name || !email) {
-            const userQuery = await query('SELECT name, email FROM users WHERE id = $1', [req.user.id]);
-            if (userQuery.rows.length > 0) {
-              name = name || userQuery.rows[0].name;
-              email = email || userQuery.rows[0].email;
-            }
-          }
-
-          if (email) {
-            await sendLevelUpEmail({
-              email,
-              name: name || 'Player',
-              oldLevel,
-              newLevel,
-            });
-          }
-        } catch (emailErr) {
-          console.error('[TaskController] Level-up email background dispatch error:', emailErr?.message || emailErr);
-        }
-      })();
-    }
 
     res.status(200).json({
       success: true,

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import QuestModal from '../components/QuestModal';
-import LevelUpModal from '../components/LevelUpModal';
 import { getLevelProgress } from '../utils/levelMath';
 import { sounds } from '../utils/sound';
 import {
@@ -28,7 +27,7 @@ export default function DashboardPage({
   isCreateModalOpen,
   setIsCreateModalOpen,
 }) {
-  const { user, character, updateCharacterState, levelUpData, setLevelUpData } = useAuth();
+  const { user, character, updateCharacterState } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [completedToday, setCompletedToday] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -731,9 +730,6 @@ export default function DashboardPage({
         onSubmit={handleModalSubmit}
         initialData={selectedQuest}
       />
-
-      {/* Level Up Confetti Modal */}
-      <LevelUpModal data={levelUpData} onClose={() => setLevelUpData(null)} />
     </div>
   );
 }

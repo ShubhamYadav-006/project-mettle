@@ -400,12 +400,6 @@ const handleGoogleAuthCallback = async (code) => {
       );
 
       await client.query('COMMIT');
-
-      // Send Welcome Email asynchronously for newly registered Google user
-      const { sendWelcomeEmail } = require('./emailService');
-      sendWelcomeEmail({ email: newUser.email, name: newUser.name }).catch((err) => {
-        console.error('[AuthService] Google OAuth welcome email error:', err?.message || err);
-      });
     } catch (err) {
       await client.query('ROLLBACK');
       throw err;

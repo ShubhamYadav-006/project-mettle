@@ -22,7 +22,13 @@
 
 ### 2.1 Character & Progression Engine
 - **Non-Linear Leveling Formula**:
-  $$\text{Required Cumulative XP for Level } N = \text{round}\left(250 \times (N - 1)^{1.5}\right)$$
+  $$\text{Required Cumulative XP for Level } N = 100 \times 2^{N - 2} \quad (N \ge 2), \quad \text{Level } 1 = 0\text{ XP}$$
+  - Level 1: 0 XP
+  - Level 2: 100 XP (Fast starter baseline)
+  - Level 3: 200 XP (Doubled)
+  - Level 4: 400 XP (Doubled)
+  - Level 5: 800 XP (Doubled)
+  - Level 10: 25,600 XP
 - **Milestone RPG Titles**:
   - Level 1–2: *Novice Scholar*
   - Level 3–4: *Apprentice Scholar*

@@ -21,8 +21,6 @@ Real-world effort directly powers in-game character development. Rather than rel
 - Inventory Management: Real-time inventory tracking for purchased items and consumables.
 - Achievement Badges: Automatic evaluation and unlock system for milestone badges based on quests completed, level reached, and active streaks.
 - Activity Audit Trail: Comprehensive audit logging of quest completions, level milestones, item purchases, and streak adjustments.
-- Welcome Email: Automated transactional welcome email dispatched via Resend upon successful new user registration.
-- Level-Up Email: Backend-verified level-up notification email sent when a quest advances the user to a new level tier.
 - Responsive Interface: Dark-mode interface designed with Electric Lime accents, optimized for desktop, tablet, and mobile viewports.
 
 ## Tech Stack
@@ -43,7 +41,6 @@ Real-world effort directly powers in-game character development. Rather than rel
 - jsonwebtoken (JWT token management)
 - cookie-parser (HTTP-only cookie processing)
 - cors (Configurable cross-origin resource sharing)
-- Resend (Transactional email delivery)
 
 ### Database
 - PostgreSQL (Neon Serverless PostgreSQL with SSL)
@@ -61,13 +58,11 @@ React 18 Single Page Application (Vite + Tailwind CSS)
 Node.js / Express Backend Server
         |
         +---> PostgreSQL Database (Neon)
-        |     ├── users & characters
-        |     ├── attributes & streaks
-        |     ├── tasks & task_completions
-        |     ├── rewards, inventory & transactions
-        |     └── badges & activity_logs
-        |
-        +---> Resend API (Transactional Welcome & Level-Up Emails)
+              ├── users & characters
+              ├── attributes & streaks
+              ├── tasks & task_completions
+              ├── rewards, inventory & transactions
+              └── badges & activity_logs
 ```
 
 Game state calculations, reward allocations, level evaluations, and inventory transactions are executed exclusively on the backend inside PostgreSQL ACID transactions to prevent client tampering and guarantee data consistency.
@@ -129,23 +124,6 @@ Mettle includes a closed-loop virtual economy driven by effort:
 - Transaction Ledger: Every Gold earning and expenditure is recorded in an immutable database audit log with running balances.
 - Server-Side Validation: Purchase requests verify character balance with database row locks (`FOR UPDATE`) to prevent double-spending or negative balances.
 
-## Email Functionality
-
-Transactional email delivery is powered by Resend through dedicated backend services:
-
-### Welcome Email
-- Trigger: Dispatched immediately after a new user account is committed to PostgreSQL.
-- Subject: `Welcome to Mettle — Your Journey Starts Here`
-- Safeguards: Sent only once upon account registration. Never triggered on login, session refresh, or existing accounts.
-
-### Level-Up Email
-- Trigger: Dispatched when quest completion causes `New Level > Old Level`.
-- Subject: `You Leveled Up! — Mettle Level {{newLevel}}`
-- Safeguards: Calculated strictly by backend progression logic. If a single quest triggers a multi-level jump, exactly one consolidated email is sent. Quests completed without leveling up do not trigger emails.
-
-### Failure Isolation
-Email operations execute asynchronously after database transactions commit. If an email fails to deliver (e.g., network timeout, invalid key), the core user operation (signup, quest completion, level-up) remains completely successful.
-
 ## Security
 
 - Authentication: Passwords hashed with bcrypt (salt factor 10). Session tokens signed via JWT.
@@ -181,7 +159,6 @@ Mettle/
 │   │   │   ├── activityService.js    # Activity audit log service
 │   │   │   ├── authService.js        # User registration and login service
 │   │   │   ├── badgeService.js       # Achievement evaluation service
-│   │   │   ├── emailService.js       # Resend transactional email service
 │   │   │   ├── rewardService.js      # Economy and inventory service
 │   │   │   └── taskService.js        # Quest execution and leveling service
 │   │   ├── utils/
@@ -227,7 +204,6 @@ Mettle/
 - Node.js (v18.0.0 or higher)
 - npm (v9.0.0 or higher)
 - PostgreSQL database (Local or Neon Serverless instance)
-- Resend API key (Optional for local testing; emails are safely skipped if unconfigured)
 
 ### Installation
 
@@ -269,8 +245,6 @@ Mettle/
    GOOGLE_CLIENT_ID=your_google_client_id
    GOOGLE_CLIENT_SECRET=your_google_client_secret
    GOOGLE_CALLBACK_URL=http://localhost:5000/api/auth/google/callback
-   RESEND_API_KEY=your_resend_api_key
-   EMAIL_FROM="Mettle <onboarding@resend.dev>"
    ```
 
 2. Configure Frontend Environment:
@@ -319,13 +293,6 @@ The repository includes automated test suites to validate database persistence, 
   node src/test_full_integration.js
   ```
   Validates registration, quest creation, XP calculations, non-linear leveling, duplicate completion rejection, reward bazaar purchases, inventory updates, and session restoration.
-
-- Transactional Email Suite:
-  ```bash
-  cd backend
-  node src/test_full_email_suite.js
-  ```
-  Validates HTML/text template rendering, direct Resend API delivery, level-up transitions, multi-level jump consolidation, and graceful failure handling.
 
 - Frontend Production Build:
   ```bash

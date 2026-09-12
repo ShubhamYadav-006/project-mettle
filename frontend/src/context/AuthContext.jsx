@@ -164,14 +164,18 @@ export const AuthProvider = ({ children }) => {
   // Update Character Stats locally from action responses
   const updateCharacterState = (newCharacterData, leveledUp = false) => {
     setCharacter((prev) => {
-      const merged = { ...prev, ...newCharacterData };
-      if (leveledUp) {
+      const oldLevel = Number(prev?.level) || 1;
+      const newLevel = Number(newCharacterData?.level);
+      const isActualLevelUp = Boolean(leveledUp) && Boolean(newLevel) && newLevel > oldLevel;
+
+      if (isActualLevelUp) {
         setLevelUpData({
-          level: merged.level,
-          title: merged.title,
+          level: newLevel,
+          title: newCharacterData.title || prev?.title || 'Novice Scholar',
         });
       }
-      return merged;
+
+      return { ...prev, ...newCharacterData };
     });
   };
 

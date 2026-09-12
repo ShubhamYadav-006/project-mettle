@@ -11,10 +11,11 @@ import QuestsPage from './pages/QuestsPage';
 import CharacterPage from './pages/CharacterPage';
 import ShopPage from './pages/ShopPage';
 import ProfilePage from './pages/ProfilePage';
+import LevelUpModal from './components/LevelUpModal';
 import { Loader2 } from 'lucide-react';
 
 function AppContent() {
-  const { user, loading, activeTheme } = useAuth();
+  const { user, loading, activeTheme, levelUpData, setLevelUpData } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [unauthView, setUnauthView] = useState('landing'); // 'landing' | 'login' | 'register'
@@ -99,6 +100,9 @@ function AppContent() {
         setActiveTab={setActiveTab}
         onOpenCreateModal={() => setIsCreateModalOpen(true)}
       />
+
+      {/* Level Up Celebration Modal */}
+      <LevelUpModal data={levelUpData} onClose={() => setLevelUpData(null)} />
     </div>
   );
 }

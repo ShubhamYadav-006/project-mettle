@@ -1,14 +1,17 @@
 /**
- * Non-Linear Level Progression Utility
- * Formula: Required Cumulative XP for Level N = Math.round(250 * (N - 1)^1.5)
+ * Level Progression Utility
+ * Level 1 to 2: 100 XP (Shorter baseline)
+ * Then doubles every level:
  * Level 1: 0 XP
- * Level 2: 250 XP
- * Level 3: 707 XP
- * Level 4: 1299 XP
- * Level 5: 2000 XP
- * Level 6: 2795 XP
- * Level 7: 3674 XP
- * Level 10: 6750 XP
+ * Level 2: 100 XP
+ * Level 3: 200 XP
+ * Level 4: 400 XP
+ * Level 5: 800 XP
+ * Level 6: 1600 XP
+ * Level 7: 3200 XP
+ * Level 8: 6400 XP
+ * Level 9: 12800 XP
+ * Level 10: 25600 XP
  */
 
 /**
@@ -18,7 +21,7 @@
  */
 const getXpForLevel = (level) => {
   if (level <= 1) return 0;
-  return Math.round(250 * Math.pow(level - 1, 1.5));
+  return 100 * Math.pow(2, level - 2);
 };
 
 /**

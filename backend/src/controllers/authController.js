@@ -1,6 +1,5 @@
 const authService = require('../services/authService');
 const { generateToken, setTokenCookie, clearTokenCookie } = require('../utils/jwt');
-const { sendWelcomeEmail } = require('../services/emailService');
 
 /**
  * Helper to validate email format
@@ -38,11 +37,6 @@ const register = async (req, res, next) => {
     // Generate JWT & Set HTTP-Only Cookie
     const token = generateToken({ id: data.user.id, email: data.user.email });
     setTokenCookie(res, token);
-
-    // Send Welcome Email asynchronously - failure does not block or break signup
-    sendWelcomeEmail({ email: data.user.email, name: data.user.name }).catch((err) => {
-      console.error('[AuthController] Welcome email background trigger error:', err?.message || err);
-    });
 
     res.status(201).json({
       success: true,

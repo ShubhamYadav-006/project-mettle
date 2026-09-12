@@ -254,11 +254,11 @@ const completeTask = async (userId, taskId, notes = '') => {
     const character = charResult.rows[0];
     const currentTotalXp = Number(character.total_xp || 0);
     const newTotalXp = currentTotalXp + xpReward;
-    const oldLevel = character.level;
+    const oldLevel = Math.max(Number(character.level) || 1, calculateLevel(currentTotalXp));
     const levelProg = getLevelProgress(newTotalXp);
     const newLevel = levelProg.currentLevel;
     const leveledUp = newLevel > oldLevel;
-    const levelJump = newLevel - oldLevel;
+    const levelJump = Math.max(1, newLevel - oldLevel);
     const newTitle = levelProg.title;
 
     // Apply level up bonus gold if leveled up (10 gold per level gained)
