@@ -25,7 +25,7 @@ function AppContent() {
       <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col items-center justify-center text-[var(--text-primary)] gap-3">
         <Loader2 className="h-8 w-8 text-[var(--accent)] animate-spin" />
         <p className="font-display text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)]">
-          Synchronizing Character...
+          Loading Mettle
         </p>
       </div>
     );
