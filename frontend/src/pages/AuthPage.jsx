@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { apiBase } from '../utils/api';
 import { ArrowRight, ArrowLeft, Sun, Moon, Eye, EyeOff } from 'lucide-react';
 
 export default function AuthPage({ initialIsRegister = false, onBackToLanding }) {
@@ -28,7 +29,7 @@ export default function AuthPage({ initialIsRegister = false, onBackToLanding })
   }, [initialIsRegister]);
 
   const handleGoogleLogin = () => {
-    window.location.href = '/api/auth/google';
+    window.location.href = `${apiBase}/auth/google`;
   };
 
   const handleSubmit = async (e) => {

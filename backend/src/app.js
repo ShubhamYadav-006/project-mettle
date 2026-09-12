@@ -35,7 +35,10 @@ app.use(cors({
     if (
       allowedOrigins.includes(normalizedOrigin) ||
       allowedOrigins.includes('*') ||
-      (process.env.NODE_ENV !== 'production' && (origin.includes('localhost') || origin.includes('127.0.0.1')))
+      (process.env.NODE_ENV !== 'production' && (origin.includes('localhost') || origin.includes('127.0.0.1'))) ||
+      normalizedOrigin.endsWith('.vercel.app') ||
+      normalizedOrigin.endsWith('.netlify.app') ||
+      normalizedOrigin.endsWith('.onrender.com')
     ) {
       return callback(null, true);
     }
