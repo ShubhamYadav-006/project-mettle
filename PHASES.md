@@ -1,6 +1,6 @@
 # 🚀 METTLE — Development Phases & Milestone Roadmap
 
-> **Status:** All core phases implemented, tested, and production-ready.
+> **Status:** All core and advanced phases implemented, tested, and production-ready.
 
 ---
 
@@ -13,7 +13,7 @@
 ---
 
 ## Phase 2 — Backend Engine & Database Layer ✅
-- [x] Neon PostgreSQL connection pooling (`pg`) with SSL verification.
+- [x] Neon PostgreSQL connection pooling (`pg`) with SSL verification and auto-reconnect backoff.
 - [x] Automated schema migration script (`src/db/migrate.js`).
 - [x] Express.js REST API with modular controllers, routes, and error middleware.
 - [x] Parameterized SQL queries preventing injection attacks.
@@ -22,7 +22,7 @@
 
 ## Phase 3 — Authentication & User Isolation ✅
 - [x] Secure password hashing via `bcryptjs` with salt rounds.
-- [x] JSON Web Token (JWT) issuing and middleware verification.
+- [x] JSON Web Token (JWT) issuing and middleware verification with HTTP-only cookies and Bearer header fallback.
 - [x] Google OAuth 2.0 integration with automatic profile and character seeding.
 - [x] Strict IDOR protection ensuring users can only read and mutate their own data.
 - [x] Automatic seeding of starter quests to eliminate blank-slate friction.
@@ -49,22 +49,47 @@
 - [x] Zero-drift PostgreSQL streak evaluation (`CURRENT_DATE`).
 - [x] Streak Freeze Shield purchasing and automatic protection on missed days.
 - [x] Reward Bazaar catalog with item purchase and inventory tracking.
-- [x] Web Audio API sound synthesizer (`playComplete`, `playClick`).
+- [x] Web Audio API sound synthesizer (`playComplete`, `playClick`, `playLevelUp`).
 - [x] Achievement badges engine with automatic milestone unlocks.
 
 ---
 
 ## Phase 7 — Minimalist UI/UX & Responsive Views ✅
-- [x] Ultra-minimalist wireframe top navbar (`Mettle | Level {level} {name} | 🔥 {streak} | 🪙 {gold} | ☾ / ☼ | ⋮`).
+- [x] Ultra-minimalist wireframe top navbar (`Mettle | Lvl {level} {name} | 🔥 {streak} | 🪙 {gold} | ☾ / ☼ | ⋮`).
 - [x] High-density compact quest cards with inline check actions.
 - [x] Seamless Dark Mode and Light Mode switching.
 - [x] Mobile bottom navigation bar.
 
 ---
 
-## Phase 8 — Testing, Hardening & GitHub Push ✅
+## Phase 8 — Testing, Hardening & Security Audits ✅
 - [x] Unit test suite for progression engine (`test_engine.js`).
 - [x] Automated security, IDOR, and injection audit suite (`test_security_audit.js`).
 - [x] End-to-end integration and database persistence suite (`test_full_integration.js`).
 - [x] Created root `.gitignore` safeguarding secrets and node_modules.
-- [x] Successfully pushed clean codebase to GitHub repository `main` branch.
+
+---
+
+## Phase 9 — Global Animations & Micro-Interactions Upgrade ✅
+- [x] GPU-accelerated keyframe animations: `pageEnter`, `checkPop`, `xpFloat`, `modalPop`, `toastIn`, `flameFlicker`.
+- [x] Hardware-accelerated `AnimatedNumber` numeric interpolation ticker (60fps requestAnimationFrame).
+- [x] `XpFloatingBadge` dynamic particle emitter on quest completion.
+- [x] Global gamified `ToastContainer` and `notify` engine.
+- [x] Centered, backdrop-blurred confirmation modals with spring scaling.
+- [x] Full `@media (prefers-reduced-motion)` accessibility support.
+
+---
+
+## Phase 10 — Production Security & API Hardening ✅
+- [x] Configured strict CORS whitelist with preflight `OPTIONS` (204 No Content) handling.
+- [x] Centralized Axios client supporting both `VITE_API_URL` and `VITE_API_BASE_URL` with 20s timeout.
+- [x] Robust response interceptor with automatic 401 token revocation and `ERR_NETWORK` detection.
+- [x] Mounted React production `<ErrorBoundary />` catching unexpected UI exceptions.
+- [x] Graceful `EADDRINUSE` port conflict handling in `server.js`.
+
+---
+
+## Phase 11 — Documentation & AI Workflow Transparency ✅
+- [x] Comprehensive `README.md`, `PRD.md`, `DATABASE.md`, `DESIGN.md`, `RULES.md`, and `walkthrough.md`.
+- [x] Transparent AI Assistance disclosure acknowledging ChatGPT and Google Antigravity.
+- [x] Verified zero-error production build (`vite build`).

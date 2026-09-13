@@ -53,7 +53,8 @@ export default function Navbar({ activeTab, setActiveTab }) {
   }, [isLogoutModalOpen]);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-[var(--border)] bg-[var(--bg-primary)]/90 backdrop-blur-md transition-colors duration-200">
+    <>
+      <header className="sticky top-0 z-40 w-full border-b border-[var(--border)] bg-[var(--bg-primary)]/90 backdrop-blur-md transition-colors duration-200">
       <div className="flex h-14 items-center justify-between px-4 sm:px-6 max-w-[1240px] mx-auto">
         {/* LEFT: Brand Logo & Title */}
         <button
@@ -197,80 +198,81 @@ export default function Navbar({ activeTab, setActiveTab }) {
           </div>
         </div>
       </div>
+    </header>
 
-      {/* Logout Confirmation Modal */}
-      {isLogoutModalOpen && (
+    {/* Logout Confirmation Modal */}
+    {isLogoutModalOpen && (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in select-none"
+        onClick={() => setIsLogoutModalOpen(false)}
+      >
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn"
-          onClick={() => setIsLogoutModalOpen(false)}
+          className="relative w-full max-w-md rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-strong)] p-6 sm:p-7 shadow-2xl space-y-5 font-sans text-xs overflow-hidden animate-modal-pop"
+          onClick={(e) => e.stopPropagation()}
         >
-          <div
-            className="relative w-full max-w-md rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-strong)] p-6 sm:p-7 shadow-2xl space-y-5 font-sans text-xs overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Top Accent Gradient Line */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-rose-500/60 to-transparent" />
+          {/* Top Accent Gradient Line */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-rose-500/60 to-transparent" />
 
-            {/* Header with Icon and Close Button */}
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3.5">
-                <div className="h-11 w-11 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-500 flex items-center justify-center shadow-[0_0_15px_rgba(244,63,94,0.2)] shrink-0">
-                  <LogOut className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="font-display text-base sm:text-lg font-bold text-[var(--text-primary)] tracking-tight">
-                    Confirm Logout
-                  </h3>
-                  <p className="text-xs text-[var(--text-muted)] font-medium">
-                    End active player session
-                  </p>
-                </div>
+          {/* Header with Icon and Close Button */}
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3.5">
+              <div className="h-11 w-11 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-500 flex items-center justify-center shadow-[0_0_15px_rgba(244,63,94,0.2)] shrink-0">
+                <LogOut className="h-5 w-5" />
               </div>
-              <button
-                onClick={() => setIsLogoutModalOpen(false)}
-                className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] rounded-lg transition-colors cursor-pointer"
-                title="Cancel"
-                aria-label="Close"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            {/* Modal Body / Information Card */}
-            <div className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] p-4 text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed space-y-2.5">
-              <p>
-                Are you sure you want to log out? Your daily progress, quest streak, character XP, and gold are securely saved.
-              </p>
-              <div className="flex items-center gap-2 text-[11px] text-[var(--text-muted)] font-mono pt-1 border-t border-[var(--border)]">
-                <Shield className="h-3.5 w-3.5 text-[var(--accent)]" />
-                <span>Progress safely synchronized</span>
+              <div>
+                <h3 className="font-display text-base sm:text-lg font-bold text-[var(--text-primary)] tracking-tight">
+                  Confirm Logout
+                </h3>
+                <p className="text-xs text-[var(--text-muted)] font-medium">
+                  End active player session
+                </p>
               </div>
             </div>
+            <button
+              onClick={() => setIsLogoutModalOpen(false)}
+              className="p-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] rounded-lg transition-colors cursor-pointer"
+              title="Cancel"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
 
-            {/* Action Buttons */}
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setIsLogoutModalOpen(false)}
-                className="px-4 py-2.5 rounded-xl border border-[var(--border-strong)] bg-[var(--bg-elevated)] hover:bg-[var(--bg-secondary)] text-[var(--text-primary)] font-semibold text-xs tracking-wider uppercase transition-all cursor-pointer hover:border-[var(--text-muted)] active:scale-95"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsLogoutModalOpen(false);
-                  logout();
-                }}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-rose-600/30 hover:shadow-rose-600/45 transition-all cursor-pointer flex items-center gap-2 active:scale-95"
-              >
-                <LogOut className="h-3.5 w-3.5" />
-                <span>Log Out</span>
-              </button>
+          {/* Modal Body / Information Card */}
+          <div className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] p-4 text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed space-y-2.5">
+            <p>
+              Are you sure you want to log out? Your daily progress, quest streak, character XP, and gold are securely saved.
+            </p>
+            <div className="flex items-center gap-2 text-[11px] text-[var(--text-muted)] font-mono pt-1 border-t border-[var(--border)]">
+              <Shield className="h-3.5 w-3.5 text-[var(--accent)]" />
+              <span>Progress safely synchronized</span>
             </div>
           </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setIsLogoutModalOpen(false)}
+              className="px-4 py-2.5 rounded-xl border border-[var(--border-strong)] bg-[var(--bg-elevated)] hover:bg-[var(--bg-secondary)] text-[var(--text-primary)] font-semibold text-xs tracking-wider uppercase transition-all cursor-pointer hover:border-[var(--text-muted)] active:scale-95"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsLogoutModalOpen(false);
+                logout();
+              }}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-rose-600/30 hover:shadow-rose-600/45 transition-all cursor-pointer flex items-center gap-2 active:scale-95"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              <span>Log Out</span>
+            </button>
+          </div>
         </div>
-      )}
-    </header>
-  );
+      </div>
+    )}
+  </>
+);
 }

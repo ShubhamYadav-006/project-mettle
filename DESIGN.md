@@ -1,10 +1,10 @@
 # ⚔️ METTLE — UI/UX Design System & Production Specification
 
-> **Version:** 3.1 — Production Implementation Standard  
+> **Version:** 4.0 — Gamified Productivity Production Standard  
 > **Brand Name:** Mettle  
 > **Target Stack:** React 18 + Tailwind CSS (v3.4) + CSS Custom Properties (Theming) + Lucide Icons + Web Audio API  
-> **Aesthetic Identity:** Monochrome + Electric Lime (`#B5E34A`)  
-> **Design Philosophy:** Minimalist wireframe precision. Less SaaS clutter. High-density actionable cards. Real-world discipline becomes visible character growth.
+> **Aesthetic Identity:** Monochrome + Electric Lime (`#B5E34A`) with Cyberpunk & Midnight Skins  
+> **Design Philosophy:** Minimalist wireframe precision. High-density actionable cards. Smooth 60fps micro-interactions. Real-world discipline becomes visible character growth.
 
 ---
 
@@ -12,15 +12,15 @@
 
 - [1. Brand Identity & Product Philosophy](#1-brand-identity--product-philosophy)
 - [2. Color System & Design Tokens](#2-color-system--design-tokens)
-- [3. Typography & Hierarchy](#3-typography--hierarchy)
-- [4. Navigation & Header Specification](#4-navigation--header-specification)
-- [5. Dashboard & Screen Layouts](#5-dashboard--screen-layouts)
+- [3. Global Animation System & Tokens](#3-global-animation-system--tokens)
+- [4. Typography & Hierarchy](#4-typography--hierarchy)
+- [5. Navigation & Header Specification](#5-navigation--header-specification)
 - [6. High-Density Quest Cards](#6-high-density-quest-cards)
 - [7. RPG Engine & Level Progression](#7-rpg-engine--level-progression)
 - [8. Attribute Radar & Character Stats](#8-attribute-radar--character-stats)
 - [9. Reward Bazaar & Economy](#9-reward-bazaar--economy)
 - [10. Audio Synthesis & Micro-Interactions](#10-audio-synthesis--micro-interactions)
-- [11. Responsive Architecture & Accessibility](#11-responsive-architecture--accessibility)
+- [11. Production Error Boundaries & Accessibility](#11-production-error-boundaries--accessibility)
 
 ---
 
@@ -36,18 +36,18 @@ Mettle converts everyday academic, routine, and discipline efforts into a tangib
             │
             ▼
 ┌────────────────────────┐
-│   COMPLETE IN METTLE   │ (XP, Gold, Attribute Point, Streak Sync)
+│   COMPLETE IN METTLE   │ (XP, Gold, Attribute Point, Streak Sync, Sound & XP Particles)
 └───────────┬────────────┘
             │
             ▼
 ┌────────────────────────┐
-│  CHARACTER & ATTRIBUTE │ (Radar Growth, Non-linear Level Up)
+│  CHARACTER & ATTRIBUTE │ (Smooth SVG Radar Morph, Non-linear Level Up Modal)
 │      PROGRESSION       │
 └───────────┬────────────┘
             │
             ▼
 ┌────────────────────────┐
-│ REPEAT FOR CONSISTENCY │ (Streak Badges, Bazaar Rewards)
+│ REPEAT FOR CONSISTENCY │ (Pulsing Streaks, Bazaar Rewards, Skin Unlocks)
 └────────────────────────┘
 ```
 
@@ -106,73 +106,69 @@ Mettle uses a dual-mode **Monochrome + Electric Lime** design system configured 
 --success: #65C99A;
 ```
 
+### 2.3 Theme Skins
+- **Default**: Monochrome + Electric Lime
+- **`theme-cyberpunk`**: Neon Cyan (`#00F0FF`) & Magenta highlights
+- **`theme-midnight`**: Deep Sapphire & Gold accents
+
 ---
 
-## 3. Typography & Hierarchy
+## 3. Global Animation System & Tokens
+
+All animations are GPU-accelerated (`transform`, `opacity`) ensuring 60fps performance across desktop and mobile devices:
+
+| Keyframe / Class | Duration & Easing | Purpose |
+| :--- | :--- | :--- |
+| **`pageEnter`** | `220ms ease-out` | Smooth page transition on navigation tab switches. |
+| **`checkPop`** | `280ms cubic-bezier(0.34, 1.56, 0.64, 1)` | Tactile spring bounce when marking quests complete. |
+| **`xpFloat`** | `750ms cubic-bezier(0.16, 1, 0.3, 1)` | Floating `+XX XP` particle badge moving `-36px` upward. |
+| **`modalPop`** | `260ms cubic-bezier(0.16, 1, 0.3, 1)` | Spring scale-in (`0.94 -> 1.0`) for level-ups and dialogs. |
+| **`toastIn` / `toastOut`**| `300ms cubic-bezier(0.16, 1, 0.3, 1)` | Slide & fade-in for gamified notifications. |
+| **`flameFlicker`** | `2.5s ease-in-out infinite` | Pulsating warm glow on the daily streak counter. |
+| **`skeletonSweep`** | `1.6s ease-in-out infinite` | Shimmer placeholder effect during data fetching. |
+| **`@media (prefers-reduced-motion)`** | Overridden to `none !important` | Full accessibility compliance for users requesting reduced motion. |
+
+---
+
+## 4. Typography & Hierarchy
 
 - **Brand & Display Headings**: `Space Grotesk`, sans-serif (`font-display`, `font-bold` / `font-black`)
 - **Body & UI Elements**: `Inter`, system-ui, sans-serif (`font-sans`)
-- **Data, Stats & Numbers**: `JetBrains Mono` / monospace (`font-mono`)
+- **Data, Stats & Numbers**: `JetBrains Mono` / monospace (`font-mono`) with `AnimatedNumber` numeric interpolation
 
 ---
 
-## 4. Navigation & Header Specification
+## 5. Navigation & Header Specification
 
-The top navigation bar is a razor-sharp, minimal, wireframe-segmented bar:
+The top navigation bar is a minimal, wireframe-segmented bar:
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│ Mettle          │ Level 3 Shubham │ 🔥 1 day │ 🪙 40 │ ☾ / ☼ │ ⋮            │
+│ Mettle          │ Lvl 3 Shubham │ 🔥 1 day │ 🪙 40 │ ☾ / ☼ │ ⋮              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Components:
-1. **Brand**: Clean title-case `Mettle` button linking to the Dashboard.
-2. **Player Badge**: Displays `Level {level} {firstName}` in accent text. Opens Profile.
-3. **Streak Pill**: Displays flame icon with `{streak} day` or `{streak} days`.
-4. **Treasury Counter**: Displays coin icon with current gold balance. Opens Bazaar/Shop.
-5. **Theme Switcher**: Smooth toggle between Light (`☼`) and Dark (`☾`) modes.
-6. **Options Popover (`⋮`)**: Opens clean dropdown for Profile, Character Stats, and Logout.
-
----
-
-## 5. Dashboard & Screen Layouts
-
-The application maintains a high-density, actionable dashboard focused on immediate daily execution:
-
-```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ 📅 TODAY — ACTIVE FOCUS                                 [+ Fast Quest]      │
-├────────────────────────────────────────┬────────────────────────────────────┤
-│ ⚔️ ACTIVE QUESTS (Compact Cards)        │ 📊 HERO PROGRESSION & RADAR        │
-│                                        │                                    │
-│ ┌────────────────────────────────────┐ │ Level 3 • Apprentice Scholar       │
-│ │ [✓] 45-min Deep Focus    Medium    │ │ Total XP: 740 / Next: 1299         │
-│ │ 📚 Academics • Intellect           │ │ [████████░░░░░░░░] 16%             │
-│ │ ⚡ +60 XP  🪙 +20 Gold             │ │                                    │
-│ └────────────────────────────────────┘ │ 5-Axis Attribute Radar:            │
-│ ┌────────────────────────────────────┐ │ • Strength      • Intellect        │
-│ │ [✓] Daily Workout        Easy      │ │ • Discipline    • Creativity       │
-│ │ 🏋️ Health • Strength               │ │ • Consistency                      │
-│ │ ⚡ +30 XP  🪙 +10 Gold             │ │                                    │
-│ └────────────────────────────────────┘ │ 🛡️ Streak Freeze Shields: 1 Active │
-└────────────────────────────────────────┴────────────────────────────────────┘
-```
+1. **Brand**: Title-case `Mettle` button linking to the Dashboard.
+2. **Player Badge**: Displays `Lvl {level} {firstName}`. Opens Profile.
+3. **Streak Pill**: Animated flame icon with animated day ticker.
+4. **Treasury Counter**: Displays coin icon with animated gold balance. Opens Bazaar/Shop.
+5. **Theme Switcher**: Smooth 360-degree rotating toggle between Light (`☼`) and Dark (`☾`) modes.
+6. **Options Dropdown (`⋮`)**: Opens clean menu for Profile, Stats, and Centered Logout Confirmation Modal.
 
 ---
 
 ## 6. High-Density Quest Cards
 
 Quest cards are engineered for fast visual scanning and instant action:
-- **Checkbox Completion Button**: Single-click completion triggering instant XP, Gold, Stat reward calculations, sound synthesizer audio feedback, and celebratory confetti.
+- **Checkbox Completion Button**: Single-click completion triggering instant XP, Gold, Stat calculations, `XpFloatingBadge` floating particle animation, synthesizer chord, and celebratory toast.
 - **Difficulty Badges**:
   - `Trivial`: Gray badge (`+15 XP`, `+5 Gold`)
   - `Easy`: Green badge (`+30 XP`, `+10 Gold`)
   - `Medium`: Yellow badge (`+60 XP`, `+20 Gold`)
   - `Hard`: Orange badge (`+120 XP`, `+45 Gold`)
   - `Epic`: Purple badge (`+250 XP`, `+100 Gold`)
-- **Category & Attribute Tag**: Directly connects completed work to RPG attribute points.
-- **Quick Action Hover**: Inline edit and delete controls.
+- **Interactive Elevation**: Subtle lift (`-2px`) and glowing border on card hover.
 
 ---
 
@@ -205,16 +201,20 @@ Characters build 5 core life attributes stored in PostgreSQL:
 4. **Creativity**: Developed via design, building, and innovative projects.
 5. **Consistency**: Cultivated automatically through daily active habit streaks.
 
+**Radar Component ([RadarChart.jsx](file:///d:/MERN_PRACTICE/Mettle/frontend/src/components/RadarChart.jsx))**:
+- Smooth SVG polygon morphing (`transition: all 700ms cubic-bezier(0.16, 1, 0.3, 1)`).
+- Vertex hover halos and numeric stat chips.
+
 ---
 
 ## 9. Reward Bazaar & Economy
 
 - **Virtual Currency**: Gold earned exclusively through verified quest completion and level-up rewards.
 - **Item Catalog**:
-  - `item_streak_freeze`: Streak Freeze Shield (Prevents streak reset on missed days).
+  - `item_streak_freeze`: Streak Freeze Shield (Protects streak from breaking on missed days).
   - `item_focus_elixir`: Focus Elixir (Consumable XP multiplier).
-  - `item_custom_reward`: Self-defined custom user milestone reward vouchers.
-- **Strict Anti-Cheat**: Purchases and balances are validated atomically inside database transactions.
+  - Custom user milestone vouchers and Theme Skins.
+- **Instant Feedback**: Toast alerts (`notify.success` / `notify.error`) on purchase and theme equipping.
 
 ---
 
@@ -223,12 +223,13 @@ Characters build 5 core life attributes stored in PostgreSQL:
 - **Zero Asset Dependencies**: Sound synthesis is powered dynamically via the browser Web Audio API (`AudioContext`).
 - **Complete Sound**: Uplifting harmonic two-tone chord on quest completion (`523.25 Hz -> 659.25 Hz`).
 - **Click Sound**: Soft acoustic click (`800 Hz -> 200 Hz`) on navigation and button interaction.
-- **Level-Up Modal**: Dramatic modal takeover with dynamic confetti burst.
+- **Level-Up Fanfare**: Multi-tone ascending chord progression accompanied by confetti bursts.
 
 ---
 
-## 11. Responsive Architecture & Accessibility
+## 11. Production Error Boundaries & Accessibility
 
+- **Global Error Boundary**: Catch-all `<ErrorBoundary />` displays a clean recovery view if unexpected UI exceptions occur.
 - **Mobile First Navigation**: Segmented mobile bottom tab bar (`Dashboard`, `Quests`, `Character`, `Shop`, `Profile`).
 - **Full Keyboard Navigation**: Every interactive element supports `Tab`, `Enter`, and `Space`.
 - **WCAG 2.1 AA Compliant**: High-contrast ratios across both Light and Dark themes.

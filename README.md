@@ -300,3 +300,14 @@ The repository includes automated test suites to validate database persistence, 
   npm run build
   ```
   Verifies that all JSX templates, CSS styles, and assets compile into optimized production bundles without errors.
+
+---
+
+## 🤖 AI Assistance & Tooling
+
+Modern AI tools were utilized during the development lifecycle of **Mettle** to accelerate prototyping, code generation, and research:
+
+- **ChatGPT** — Utilized for architectural research, technical guidance, algorithm formulation, and problem-solving.
+- **Google Antigravity** — Utilized for agentic code generation, interactive component development, and workflow automation.
+
+> **Note:** All system architecture, database schemas, security configurations, business logic, testing, and final implementations were engineered, reviewed, and validated by the project development team.

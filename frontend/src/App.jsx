@@ -11,6 +11,8 @@ import QuestsPage from './pages/QuestsPage';
 import CharacterPage from './pages/CharacterPage';
 import ShopPage from './pages/ShopPage';
 import ProfilePage from './pages/ProfilePage';
+import LevelUpModal from './components/LevelUpModal';
+import ErrorBoundary from './components/common/ErrorBoundary';
 import ToastContainer from './components/common/ToastContainer';
 import { Loader2 } from 'lucide-react';
 
@@ -114,8 +116,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }

@@ -1,7 +1,7 @@
 # 🗄️ METTLE — Database Specification & Schema Architecture
 
 > **Database Engine:** PostgreSQL (Neon Serverless PostgreSQL)  
-> **Backend Driver:** `pg` (Node Postgres Connection Pool)  
+> **Backend Driver:** `pg` (Node Postgres Connection Pool) with auto-reconnect  
 > **Authority:** Backend is the sole source of truth; all progression state is strictly verified and persisted.
 
 ---
@@ -28,7 +28,7 @@
 ## 2. Core Tables Specification
 
 ### 2.1 `users`
-Stores user authentication profiles, Google OAuth mappings, and avatars.
+Stores user authentication credentials, Google OAuth identity, avatar images (compressed data URI or direct URL), and biography.
 ```sql
 CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -181,3 +181,5 @@ All quest completion and purchase operations execute inside PostgreSQL database 
 1. **Row-Level Locking (`FOR UPDATE`)**: Prevents race conditions and double-completion exploits on parallel requests.
 2. **Atomic Reward Distribution**: Character XP, Gold, Attribute stats, and Streak updates happen atomically in a single ACID transaction.
 3. **Native SQL Date Evaluation**: Evaluates `s.last_activity_date = CURRENT_DATE` directly inside PostgreSQL engine, eliminating local timezone drift and duplicate same-day streak increments.
+4. **Streak Freeze Shield Fallback**: If a day is missed and `freeze_count > 0`, the streak is preserved while consuming one shield.
+5. **Connection Pool Optimization**: SSL `rejectUnauthorized: false` configuration with Neon serverless retry backoff for zero transient connection dropouts.
