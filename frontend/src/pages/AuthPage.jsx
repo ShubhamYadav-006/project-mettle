@@ -87,7 +87,7 @@ export default function AuthPage({ initialIsRegister = false, onBackToLanding })
       <div className="flex-1 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-[420px]">
           {/* Main Card */}
-          <div className="mettle-panel rounded-md p-6 sm:p-8 border border-[var(--border-strong)] bg-[var(--bg-surface)] shadow-md space-y-6">
+          <div className="mettle-panel rounded-md p-6 sm:p-8 border border-[var(--border-strong)] bg-[var(--bg-surface)] shadow-xl space-y-6 animate-modal-pop">
             {/* Header / Brand Identity */}
             <div className="text-center space-y-2">
               <h1 className="font-display text-2xl sm:text-3xl font-black tracking-tight text-[var(--text-primary)]">
@@ -102,7 +102,7 @@ export default function AuthPage({ initialIsRegister = false, onBackToLanding })
 
             {/* Error Banner */}
             {error && (
-              <div className="p-3 rounded-sm bg-[var(--danger)]/10 border border-[var(--danger)]/30 text-[var(--danger)] text-xs font-semibold font-sans animate-in fade-in duration-200">
+              <div className="p-3 rounded-sm bg-[var(--danger)]/10 border border-[var(--danger)]/30 text-[var(--danger)] text-xs font-semibold font-sans animate-fade-in">
                 {error}
               </div>
             )}
@@ -111,7 +111,7 @@ export default function AuthPage({ initialIsRegister = false, onBackToLanding })
             <button
               type="button"
               onClick={handleGoogleLogin}
-              className="w-full py-2.5 px-4 rounded-sm bg-[var(--bg-elevated)] hover:bg-[var(--bg-secondary)] border border-[var(--border-strong)] hover:border-[var(--border-interactive)] text-[var(--text-primary)] font-sans font-semibold text-xs transition-all flex items-center justify-center gap-2.5 active:scale-[0.99] shadow-sm cursor-pointer"
+              className="w-full py-2.5 px-4 rounded-sm bg-[var(--bg-elevated)] hover:bg-[var(--bg-secondary)] border border-[var(--border-strong)] hover:border-[var(--border-interactive)] text-[var(--text-primary)] font-sans font-semibold text-xs transition-all flex items-center justify-center gap-2.5 active:scale-[0.98] shadow-sm cursor-pointer hover:shadow-md"
             >
               <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24">
                 <path
@@ -155,7 +155,7 @@ export default function AuthPage({ initialIsRegister = false, onBackToLanding })
                     placeholder="e.g. Alex"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-sm bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-xs focus:outline-none focus:border-[var(--accent)] transition-colors font-sans"
+                    className="w-full px-3.5 py-2.5 rounded-sm bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-xs focus:outline-none focus:border-[var(--accent)] transition-all font-sans mettle-input"
                     required
                   />
                 </div>
@@ -170,7 +170,7 @@ export default function AuthPage({ initialIsRegister = false, onBackToLanding })
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-sm bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-xs focus:outline-none focus:border-[var(--accent)] transition-colors font-sans"
+                  className="w-full px-3.5 py-2.5 rounded-sm bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-xs focus:outline-none focus:border-[var(--accent)] transition-all font-sans mettle-input"
                   required
                 />
               </div>
@@ -187,13 +187,13 @@ export default function AuthPage({ initialIsRegister = false, onBackToLanding })
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-3.5 pr-10 py-2.5 rounded-sm bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-xs focus:outline-none focus:border-[var(--accent)] transition-colors font-sans"
+                    className="w-full pl-3.5 pr-10 py-2.5 rounded-sm bg-[var(--bg-secondary)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-xs focus:outline-none focus:border-[var(--accent)] transition-all font-sans mettle-input"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 transition-colors"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 transition-colors cursor-pointer"
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -205,7 +205,7 @@ export default function AuthPage({ initialIsRegister = false, onBackToLanding })
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 px-4 rounded-sm bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-text)] font-sans font-semibold text-xs uppercase tracking-wider active:scale-[0.99] transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 mt-3 shadow-sm cursor-pointer"
+                className="w-full py-2.5 px-4 rounded-sm bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-text)] font-sans font-bold text-xs uppercase tracking-wider active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 mt-3 shadow-md hover:shadow-[0_0_20px_var(--accent-soft)] cursor-pointer"
               >
                 <span>{loading ? 'Authenticating...' : isRegister ? 'Create Account' : 'Sign In'}</span>
                 <ArrowRight className="h-3.5 w-3.5 stroke-[2.5]" />

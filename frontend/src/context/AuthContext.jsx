@@ -9,13 +9,13 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [levelUpData, setLevelUpData] = useState(null);
 
-  // Theme Management (Default: 'light', Options: 'light' | 'dark')
+  // Theme Management (Default: 'dark', Options: 'dark' | 'light')
   const [theme, setThemeState] = useState(() => {
     try {
       const savedTheme = localStorage.getItem('mettle-theme');
-      return savedTheme === 'dark' ? 'dark' : 'light';
+      return savedTheme === 'light' ? 'light' : 'dark';
     } catch (e) {
-      return 'light';
+      return 'dark';
     }
   });
 
@@ -32,11 +32,30 @@ export const AuthProvider = ({ children }) => {
   }, [theme]);
 
   const toggleTheme = () => {
-    setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    setThemeState((prev) => {
+      const next = prev === 'dark' ? 'light' : 'dark';
+      if (next === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      try {
+        localStorage.setItem('mettle-theme', next);
+      } catch (e) {}
+      return next;
+    });
   };
 
   const setTheme = (newTheme) => {
     if (newTheme === 'dark' || newTheme === 'light') {
+      if (newTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      try {
+        localStorage.setItem('mettle-theme', newTheme);
+      } catch (e) {}
       setThemeState(newTheme);
     }
   };

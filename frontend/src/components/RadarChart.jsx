@@ -2,7 +2,7 @@ import React from 'react';
 
 /**
  * 5-Axis Attribute Polygon Radar Chart (SVG Based)
- * Supports dynamic CSS variables for seamless Light / Dark mode rendering
+ * Supports dynamic CSS variables and smooth 60fps polygon transitions
  */
 export default function RadarChart({ attributes }) {
   const stats = [
@@ -58,6 +58,8 @@ export default function RadarChart({ attributes }) {
               fill="none"
               stroke="var(--border)"
               strokeWidth="1"
+              strokeDasharray={idx < 3 ? '3 3' : 'none'}
+              className="opacity-70"
             />
           );
         })}
@@ -74,35 +76,37 @@ export default function RadarChart({ attributes }) {
               y2={y}
               stroke="var(--border)"
               strokeWidth="1"
+              className="opacity-80"
             />
           );
         })}
 
-        {/* Active Attribute Polygon */}
+        {/* Active Attribute Polygon with Smooth Transitions */}
         <polygon
           points={polygonPoints}
           fill="var(--accent-soft)"
           stroke="var(--accent)"
-          strokeWidth="1.5"
-          className="transition-all duration-300 ease-out"
+          strokeWidth="2"
+          className="transition-all duration-700 ease-out filter drop-shadow-[0_0_8px_rgba(181,227,74,0.35)]"
         />
 
         {/* Vertex Dots & Labels */}
         {stats.map((stat, i) => {
           const ratio = Math.min(1, Math.max(0.15, stat.value / maxStatValue));
           const { x, y } = getCoordinates(i, ratio);
-          const labelPos = getCoordinates(i, 1.25);
+          const labelPos = getCoordinates(i, 1.28);
 
           return (
-            <g key={stat.key}>
+            <g key={stat.key} className="transition-transform duration-300 hover:scale-110">
               {/* Vertex Dot */}
               <circle
                 cx={x}
                 cy={y}
-                r="3.5"
+                r="4.5"
                 fill={stat.color}
                 stroke="var(--bg-surface)"
-                strokeWidth="1.5"
+                strokeWidth="2"
+                className="transition-all duration-700 ease-out shadow-md"
               />
               {/* Text Label */}
               <text
@@ -114,8 +118,9 @@ export default function RadarChart({ attributes }) {
                 fontSize="11"
                 fontWeight="700"
                 fontFamily="'Space Grotesk', sans-serif"
+                className="transition-colors hover:fill-[var(--text-primary)]"
               >
-                {stat.label} <tspan fill="var(--text-primary)">{stat.value}</tspan>
+                {stat.label} <tspan fill="var(--text-primary)" fontWeight="900">{stat.value}</tspan>
               </text>
             </g>
           );

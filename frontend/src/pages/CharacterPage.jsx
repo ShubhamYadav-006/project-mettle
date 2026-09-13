@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import RadarChart from '../components/RadarChart';
-import { Trophy, Info } from 'lucide-react';
+import AnimatedNumber from '../components/common/AnimatedNumber';
+import { Trophy, Info, Sparkles, Shield, Award } from 'lucide-react';
 
 export default function CharacterPage() {
   const { user, character } = useAuth();
@@ -55,9 +56,9 @@ export default function CharacterPage() {
   ];
 
   return (
-    <div className="space-y-6 select-none">
+    <div className="space-y-6 select-none max-w-[1000px] mx-auto pb-12 animate-fadeIn">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-[var(--border)] pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4 border-b border-[var(--border)] pb-4">
         <div>
           <h1 className="font-display text-2xl sm:text-3xl font-black text-[var(--text-primary)] tracking-wide">
             CHARACTER
@@ -71,9 +72,9 @@ export default function CharacterPage() {
         <div className="flex gap-4 text-xs font-sans font-semibold">
           <button
             onClick={() => setActiveSubTab('sheet')}
-            className={`pb-1 border-b-2 transition-colors ${
+            className={`pb-1 border-b-2 transition-all cursor-pointer ${
               activeSubTab === 'sheet'
-                ? 'border-[var(--accent)] text-[var(--accent)]'
+                ? 'border-[var(--accent)] text-[var(--accent)] font-bold'
                 : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]'
             }`}
           >
@@ -81,9 +82,9 @@ export default function CharacterPage() {
           </button>
           <button
             onClick={() => setActiveSubTab('badges')}
-            className={`pb-1 border-b-2 transition-colors ${
+            className={`pb-1 border-b-2 transition-all cursor-pointer ${
               activeSubTab === 'badges'
-                ? 'border-[var(--accent)] text-[var(--accent)]'
+                ? 'border-[var(--accent)] text-[var(--accent)] font-bold'
                 : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]'
             }`}
           >
@@ -91,9 +92,9 @@ export default function CharacterPage() {
           </button>
           <button
             onClick={() => setActiveSubTab('history')}
-            className={`pb-1 border-b-2 transition-colors ${
+            className={`pb-1 border-b-2 transition-all cursor-pointer ${
               activeSubTab === 'history'
-                ? 'border-[var(--accent)] text-[var(--accent)]'
+                ? 'border-[var(--accent)] text-[var(--accent)] font-bold'
                 : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]'
             }`}
           >
@@ -104,18 +105,18 @@ export default function CharacterPage() {
 
       {/* SUBTAB 1: CHARACTER SHEET */}
       {activeSubTab === 'sheet' && (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-fadeIn">
           {/* Identity & Core Metrics Card */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
             {/* Left: Identity & Radar */}
-            <div className="md:col-span-6 mettle-panel rounded-md p-6 flex flex-col justify-between bg-[var(--bg-surface)]">
+            <div className="md:col-span-6 mettle-panel rounded-2xl p-6 sm:p-7 flex flex-col justify-between bg-[var(--bg-surface)] border border-[var(--border)] shadow-md">
               <div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--accent)]">
                       Character Profile
                     </span>
-                    <h2 className="font-display text-2xl font-black text-[var(--text-primary)]">
+                    <h2 className="font-display text-2xl font-black text-[var(--text-primary)] mt-0.5">
                       {user?.name || 'Member'}
                     </h2>
                     <p className="font-sans text-xs font-semibold text-[var(--text-secondary)] mt-0.5">
@@ -127,27 +128,27 @@ export default function CharacterPage() {
                     <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] block">
                       Level
                     </span>
-                    <span className="font-display text-3xl font-black text-[var(--accent)]">
-                      {level}
+                    <span className="font-display text-3xl sm:text-4xl font-black text-[var(--accent)]">
+                      <AnimatedNumber value={level} />
                     </span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-[var(--border)]">
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                  <div className="mettle-card-interactive p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)]">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] block">
                       Total Experience
                     </span>
-                    <p className="font-display text-lg font-black text-[var(--text-primary)]">
-                      {Number(totalXp).toLocaleString()} <span className="text-xs text-[var(--text-muted)]">XP</span>
+                    <p className="font-display text-lg font-black text-[var(--text-primary)] mt-1">
+                      <AnimatedNumber value={totalXp} /> <span className="text-xs text-[var(--text-muted)]">XP</span>
                     </p>
                   </div>
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                  <div className="mettle-card-interactive p-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)]">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] block">
                       Mettle Score
                     </span>
-                    <p className="font-display text-lg font-black text-[var(--text-primary)]">
-                      {mettleScore}
+                    <p className="font-display text-lg font-black text-[var(--accent)] mt-1">
+                      <AnimatedNumber value={mettleScore} />
                     </p>
                   </div>
                 </div>
@@ -156,7 +157,7 @@ export default function CharacterPage() {
               {/* 5-Axis Radar Map */}
               <div className="mt-6 pt-4 border-t border-[var(--border)] flex flex-col items-center">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-2">
-                  Attribute Radar
+                  Attribute Radar Matrix
                 </span>
                 <RadarChart attributes={attributes} />
               </div>
@@ -164,7 +165,7 @@ export default function CharacterPage() {
 
             {/* Right: Attributes Breakdown List */}
             <div className="md:col-span-6 space-y-4">
-              <div className="mettle-panel rounded-md p-6 space-y-4 bg-[var(--bg-surface)]">
+              <div className="mettle-panel rounded-2xl p-6 space-y-4 bg-[var(--bg-surface)] border border-[var(--border)] shadow-md">
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] block">
                     Personal Attributes
@@ -176,14 +177,14 @@ export default function CharacterPage() {
 
                 <div className="space-y-3">
                   {attributeList.map((attr) => (
-                    <div key={attr.key} className="p-3.5 rounded-sm bg-[var(--bg-elevated)] border border-[var(--border)] space-y-2">
+                    <div key={attr.key} className="mettle-card-interactive p-3.5 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] space-y-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
                           <span
                             className="w-2.5 h-2.5 rounded-full shrink-0"
                             style={{
                               backgroundColor: attr.color,
-                              boxShadow: `0 0 6px ${attr.color}40`,
+                              boxShadow: `0 0 8px ${attr.color}60`,
                             }}
                           />
                           <div>
@@ -201,15 +202,16 @@ export default function CharacterPage() {
                           </div>
                         </div>
                         <span className="font-mono text-sm font-bold text-[var(--text-primary)] shrink-0 pl-2">
-                          {attr.val} <span className="text-[10px] font-normal text-[var(--text-muted)]">pts</span>
+                          <AnimatedNumber value={attr.val} /> <span className="text-[10px] font-normal text-[var(--text-muted)]">pts</span>
                         </span>
                       </div>
-                      <div className="w-full h-1.5 rounded-full bg-[var(--bg-primary)] overflow-hidden border border-[var(--border)]">
+                      <div className="w-full h-2 rounded-full bg-[var(--bg-primary)] overflow-hidden border border-[var(--border)] p-[1px]">
                         <div
-                          className="h-full rounded-full transition-all duration-500 ease-out"
+                          className="h-full rounded-full transition-all duration-700 ease-out"
                           style={{
                             backgroundColor: attr.color,
                             width: `${Math.min(100, Math.max(15, (attr.val / 50) * 100))}%`,
+                            boxShadow: `0 0 8px ${attr.color}60`,
                           }}
                         />
                       </div>
@@ -219,10 +221,10 @@ export default function CharacterPage() {
               </div>
 
               {/* Progression Explanation */}
-              <div className="mettle-panel rounded-md p-5 bg-[var(--bg-surface)]">
+              <div className="mettle-panel rounded-2xl p-5 bg-[var(--bg-surface)] border border-[var(--border)]">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Info className="h-4 w-4 text-[var(--text-muted)]" />
+                    <Info className="h-4 w-4 text-[var(--accent)]" />
                     <span className="font-display text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">
                       How Progression Works
                     </span>
@@ -240,7 +242,7 @@ export default function CharacterPage() {
                 </p>
 
                 {showFormula && (
-                  <div className="mt-3 p-3 rounded-sm bg-[var(--bg-primary)] border border-[var(--border)] font-mono text-xs text-[var(--text-primary)]">
+                  <div className="mt-3 p-3.5 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] font-mono text-xs text-[var(--text-primary)] animate-fadeIn">
                     <code>Required XP = round(250 × (Level − 1)^1.5)</code>
                     <p className="text-[11px] text-[var(--text-muted)] mt-1 font-sans">
                       Base XP per tier = 250 × (N − 1)^1.5. Progress is mathematically continuous with zero float drift.
@@ -255,31 +257,31 @@ export default function CharacterPage() {
 
       {/* SUBTAB 2: BADGES & ACHIEVEMENTS */}
       {activeSubTab === 'badges' && (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3.5 animate-fadeIn">
           {badges.map((badge) => (
             <div
               key={badge.id}
-              className={`p-4 rounded-md mettle-panel border transition-all ${
+              className={`mettle-card-interactive p-4.5 rounded-2xl mettle-panel border transition-all ${
                 badge.is_unlocked
-                  ? 'border-[var(--border-strong)] bg-[var(--bg-elevated)]'
+                  ? 'border-[var(--accent-border)] bg-[var(--bg-elevated)] shadow-md shadow-[var(--accent)]/5'
                   : 'opacity-40 border-[var(--border)] bg-[var(--bg-surface)]'
               }`}
             >
-              <div className="flex items-start gap-3">
+              <div className="flex items-start gap-3.5">
                 <div
-                  className={`p-2 rounded-sm border ${
+                  className={`p-2.5 rounded-xl border transition-all ${
                     badge.is_unlocked
-                      ? 'bg-[var(--accent-soft)] border-[var(--accent-border)] text-[var(--accent)]'
+                      ? 'bg-[var(--accent-soft)] border-[var(--accent-border)] text-[var(--accent)] animate-pulse-subtle'
                       : 'bg-black/40 border-white/5 text-[var(--text-muted)]'
                   }`}
                 >
                   <Trophy className="h-5 w-5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-sans text-sm font-semibold text-[var(--text-primary)]">
+                  <h4 className="font-sans text-sm font-bold text-[var(--text-primary)]">
                     {badge.name}
                   </h4>
-                  <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                  <p className="text-xs text-[var(--text-secondary)] mt-0.5 leading-relaxed">
                     {badge.description}
                   </p>
                 </div>
@@ -290,11 +292,11 @@ export default function CharacterPage() {
                   {badge.requirement_type.replace('_', ' ')}
                 </span>
                 <span
-                  className={`font-semibold ${
+                  className={`font-bold font-mono text-[11px] ${
                     badge.is_unlocked ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]'
                   }`}
                 >
-                  {badge.is_unlocked ? 'Unlocked' : `Threshold: ${badge.requirement_value}`}
+                  {badge.is_unlocked ? 'Unlocked ✓' : `Threshold: ${badge.requirement_value}`}
                 </span>
               </div>
             </div>
@@ -304,28 +306,28 @@ export default function CharacterPage() {
 
       {/* SUBTAB 3: ACTIVITY TIMELINE */}
       {activeSubTab === 'history' && (
-        <div className="mettle-panel rounded-md p-6 bg-[var(--bg-surface)]">
+        <div className="mettle-panel rounded-2xl p-6 bg-[var(--bg-surface)] border border-[var(--border)] shadow-md animate-fadeIn">
           {activities.length === 0 ? (
-            <div className="py-8 text-center text-xs font-semibold text-[var(--text-muted)]">
+            <div className="py-10 text-center text-xs font-semibold text-[var(--text-muted)]">
               No activity recorded yet.
             </div>
           ) : (
             <div className="space-y-4">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] block mb-4">
-                Recent Activity
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] block mb-2">
+                Recent Activity Log
               </span>
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {activities.map((act) => (
                   <div
                     key={act.id}
-                    className="flex items-baseline justify-between gap-4 py-2 border-b border-[var(--border)] last:border-0"
+                    className="mettle-card-interactive flex items-center justify-between gap-4 p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)]"
                   >
-                    <div className="flex items-baseline gap-3">
+                    <div className="flex items-center gap-3">
                       <span className="font-mono text-[11px] text-[var(--text-muted)]">
                         {new Date(act.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                       <div>
-                        <span className="font-sans text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wide">
+                        <span className="font-sans text-xs font-bold text-[var(--text-primary)] uppercase tracking-wide">
                           {act.event_type.replace(/_/g, ' ')}
                         </span>
                         <span className="text-xs text-[var(--text-secondary)] ml-2">
@@ -335,7 +337,7 @@ export default function CharacterPage() {
                     </div>
 
                     {act.amount && (
-                      <span className="font-display text-xs font-bold text-[var(--accent)]">
+                      <span className="font-display text-xs font-bold text-[var(--accent)] bg-[var(--accent-soft)] px-2 py-0.5 rounded-md border border-[var(--accent-border)]">
                         +{act.amount}
                       </span>
                     )}

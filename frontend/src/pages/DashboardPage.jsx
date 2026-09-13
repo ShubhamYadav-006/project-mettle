@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import QuestModal from '../components/QuestModal';
+import AnimatedNumber from '../components/common/AnimatedNumber';
+import { notify } from '../components/common/ToastContainer';
 import { getLevelProgress } from '../utils/levelMath';
 import { sounds } from '../utils/sound';
 import {
@@ -19,6 +21,7 @@ import {
   TrendingUp,
   Target,
   CheckCircle2,
+  Award,
 } from 'lucide-react';
 
 export default function DashboardPage({
@@ -99,6 +102,7 @@ export default function DashboardPage({
     if (!targetQuest) return;
 
     sounds.playComplete();
+    notify.xp(Number(targetQuest.xp_reward) || 30, `Completed "${targetQuest.title}"`);
 
     // Optimistic UI update
     setTasks((prev) => prev.filter((t) => String(t.id) !== String(taskId)));
@@ -261,9 +265,9 @@ export default function DashboardPage({
 
   if (loading && tasks.length === 0 && completedToday.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-[var(--text-secondary)] gap-3">
-        <Loader2 className="h-7 w-7 text-[var(--accent)] animate-spin" />
-        <span className="font-sans text-xs uppercase tracking-wider font-semibold">
+      <div className="flex flex-col items-center justify-center py-24 text-[var(--text-secondary)] gap-3 animate-fadeIn">
+        <Loader2 className="h-8 w-8 text-[var(--accent)] animate-spin" />
+        <span className="font-display text-xs uppercase tracking-widest font-bold text-[var(--text-muted)]">
           Loading Dashboard...
         </span>
       </div>
@@ -271,24 +275,18 @@ export default function DashboardPage({
   }
 
   return (
-    <div className="max-w-[860px] mx-auto space-y-5 animate-fadeIn pb-12">
+    <div className="max-w-[880px] mx-auto space-y-6 animate-fadeIn pb-12">
       {/* 1. TOP HEADER BAR */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-xs bg-[var(--accent-soft)] border border-[var(--accent-border)] text-[var(--accent)] font-mono text-[10px] font-bold uppercase tracking-wider">
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
-              Daily Operations
-            </span>
-            <span className="text-xs text-[var(--text-muted)] font-mono">
-              • {streak} Day Streak
-            </span>
+          <div className="flex items-center gap-2 mb-1.5">
+
           </div>
           <h1 className="font-display text-2xl sm:text-3xl font-black tracking-tight text-[var(--text-primary)]">
             {formattedDate}
           </h1>
           <p className="font-sans text-xs text-[var(--text-secondary)] mt-0.5">
-            Turn daily action into measurable character progress.
+            Turn daily execution into measurable character progress.
           </p>
         </div>
 
@@ -298,53 +296,53 @@ export default function DashboardPage({
             setSelectedQuest(null);
             setIsCreateModalOpen(true);
           }}
-          className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-sm bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-text)] font-sans text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-xs active:scale-95 shrink-0"
+          className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-md bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-text)] font-sans text-xs font-black uppercase tracking-wider transition-all cursor-pointer shadow-[0_0_15px_rgba(181,227,74,0.25)] hover:shadow-[0_0_22px_rgba(181,227,74,0.4)] hover:scale-[1.02] active:scale-95 shrink-0"
         >
-          <Plus className="h-4 w-4 stroke-[2.5]" />
+          <Plus className="h-4 w-4 stroke-[3]" />
           <span>New Quest</span>
         </button>
       </div>
 
       {/* ERROR NOTICE IF ANY */}
       {error && (
-        <div className="flex items-center gap-2 p-3 rounded-md bg-[var(--danger)]/10 border border-[var(--danger)]/30 text-[var(--danger)] text-xs font-sans">
+        <div className="flex items-center gap-2.5 p-3.5 rounded-lg bg-[var(--danger)]/10 border border-[var(--danger)]/30 text-[var(--danger)] text-xs font-sans animate-fadeIn">
           <AlertCircle className="h-4 w-4 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {/* 2. CARD 1: COMMAND HUD — LEVEL PROGRESS & DAILY YIELD */}
-      <div className="mettle-card rounded-md p-5 sm:p-6 border border-[var(--border-strong)] bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-xs relative overflow-hidden">
+      <div className="card-ambient-glow rounded-2xl p-5 sm:p-6 border border-[var(--border-strong)] bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-md relative overflow-hidden transition-all animate-fadeInUp delay-50">
         {/* Subtle Ambient Backlight */}
-        <div className="absolute top-0 right-0 w-64 h-32 bg-[var(--accent)]/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-72 h-36 bg-[var(--accent)]/6 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10 items-center">
           {/* Left Column: Character Tier & XP Progress (7 cols) */}
           <div className="lg:col-span-7 flex flex-col justify-between space-y-4">
             <div>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="h-10 w-10 rounded-sm bg-[var(--bg-primary)] border border-[var(--border-strong)] flex items-center justify-center font-display font-black text-sm text-[var(--accent)] shadow-2xs">
-                    L{currentLevel}
+                <div className="flex items-center gap-3">
+                  <div className="h-11 w-11 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-strong)] flex items-center justify-center font-display font-black text-sm text-[var(--accent)] shadow-xs transition-transform hover:scale-105">
+                    L<AnimatedNumber value={currentLevel} />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-display text-base sm:text-lg font-bold tracking-tight text-[var(--text-primary)]">
-                        LEVEL {currentLevel}
+                        LEVEL <AnimatedNumber value={currentLevel} />
                       </span>
-                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-xs bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)]">
+                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] shadow-2xs">
                         {characterTitle}
                       </span>
                     </div>
-                    <span className="text-[11px] text-[var(--text-secondary)] font-mono">
-                      {Number(totalXp).toLocaleString()} Cumulative XP
+                    <span className="text-[11px] text-[var(--text-secondary)] font-mono flex items-baseline gap-1">
+                      <AnimatedNumber value={totalXp} /> Cumulative XP
                     </span>
                   </div>
                 </div>
 
                 <div className="text-right">
                   <span className="font-mono text-xs font-bold text-[var(--accent)]">
-                    {xpPercentage}%
+                    <AnimatedNumber value={xpPercentage} />%
                   </span>
                   <span className="text-[10px] text-[var(--text-muted)] block font-mono">
                     to Lvl {currentLevel + 1}
@@ -353,17 +351,17 @@ export default function DashboardPage({
               </div>
             </div>
 
-            {/* High Precision XP Gauge */}
-            <div className="space-y-1.5 pt-1">
-              <div className="h-2.5 w-full rounded-full bg-[var(--bg-primary)] overflow-hidden border border-[var(--border)] p-[1px]">
+            {/* High Precision XP Gauge with Glitter & Shimmer Sparkle */}
+            <div className="space-y-2 pt-1">
+              <div className="h-3.5 w-full rounded-full bg-[var(--bg-primary)] overflow-hidden border border-[var(--border-strong)] p-[1.5px] shadow-inner relative">
                 <div
-                  className="h-full rounded-full bg-[var(--accent)] transition-all duration-700 ease-out"
+                  className="xp-bar-glitter h-full rounded-full transition-all duration-700 ease-out"
                   style={{ width: `${Math.max(4, Math.min(100, xpPercentage))}%` }}
                 />
               </div>
-              <div className="flex items-center justify-between text-[10px] font-mono text-[var(--text-muted)]">
-                <span>Tier: {Number(xpInTier).toLocaleString()} / {Number(xpRequiredForTier).toLocaleString()} XP</span>
-                <span>{Number(xpRemaining).toLocaleString()} XP Needed</span>
+              <div className="flex items-center justify-between text-[11px] font-mono font-medium text-[var(--text-muted)]">
+                <span>Tier: <strong className="text-[var(--text-primary)] font-bold"><AnimatedNumber value={xpInTier} /></strong> / {Number(xpRequiredForTier).toLocaleString()} XP</span>
+                <span className="text-[var(--accent)] font-bold"><AnimatedNumber value={xpRemaining} /> XP Needed</span>
               </div>
             </div>
           </div>
@@ -371,46 +369,46 @@ export default function DashboardPage({
           {/* Right Column: Daily Yield & Momentum Matrix (5 cols) */}
           <div className="lg:col-span-5 grid grid-cols-2 gap-2.5 lg:border-l lg:border-[var(--border)] lg:pl-6">
             {/* 1. Daily Quests Progress */}
-            <div className="p-3 rounded-sm bg-[var(--bg-primary)] border border-[var(--border)] flex flex-col justify-between">
+            <div className="mettle-card-interactive p-3.5 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] flex flex-col justify-between group shadow-2xs">
               <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
                 <span>Quests</span>
-                <Target className="h-3 w-3 text-[var(--accent)]" />
+                <Target className="h-3.5 w-3.5 text-[var(--accent)] group-hover:scale-110 transition-transform" />
               </div>
               <div className="mt-2">
                 <span className="font-display text-lg font-bold text-[var(--text-primary)]">
-                  {completedCount}/{totalQuestsToday}
+                  <AnimatedNumber value={completedCount} />/{totalQuestsToday}
                 </span>
                 <span className="text-[10px] font-mono text-[var(--text-secondary)] block">
-                  {completionPercentage}% Complete
+                  <AnimatedNumber value={completionPercentage} />% Complete
                 </span>
               </div>
             </div>
 
             {/* 2. Consistency Streak */}
-            <div className="p-3 rounded-sm bg-[var(--bg-primary)] border border-[var(--border)] flex flex-col justify-between">
+            <div className="mettle-card-interactive p-3.5 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] flex flex-col justify-between group shadow-2xs">
               <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
                 <span>Streak</span>
-                <Flame className={`h-3 w-3 ${streak > 0 ? 'text-amber-500' : 'text-[var(--text-muted)]'}`} />
+                <Flame className={`h-4 w-4 ${streak > 0 ? 'text-amber-500 fill-amber-500/30 animate-flame' : 'text-[var(--text-muted)]'}`} />
               </div>
               <div className="mt-2">
                 <span className="font-display text-lg font-bold text-[var(--text-primary)]">
-                  {streak} {streak === 1 ? 'Day' : 'Days'}
+                  <AnimatedNumber value={streak} /> {streak === 1 ? 'Day' : 'Days'}
                 </span>
-                <span className="text-[10px] font-mono text-[var(--accent)] block">
+                <span className="text-[10px] font-mono text-amber-500 font-semibold block">
                   Consistent
                 </span>
               </div>
             </div>
 
             {/* 3. XP Harvested Today */}
-            <div className="p-3 rounded-sm bg-[var(--bg-primary)] border border-[var(--border)] flex flex-col justify-between">
+            <div className="mettle-card-interactive p-3.5 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] flex flex-col justify-between group shadow-2xs">
               <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
                 <span>Earned XP</span>
-                <Sparkles className="h-3 w-3 text-[var(--accent)]" />
+                <Sparkles className="h-3.5 w-3.5 text-[var(--accent)] group-hover:rotate-45 group-hover:scale-110 transition-transform duration-300" />
               </div>
               <div className="mt-2">
                 <span className="font-mono text-base sm:text-lg font-bold text-[var(--accent)]">
-                  +{earnedXpToday}
+                  +<AnimatedNumber value={earnedXpToday} />
                 </span>
                 <span className="text-[10px] font-mono text-[var(--text-muted)] block">
                   XP Today
@@ -419,14 +417,14 @@ export default function DashboardPage({
             </div>
 
             {/* 4. Gold Earned Today */}
-            <div className="p-3 rounded-sm bg-[var(--bg-primary)] border border-[var(--border)] flex flex-col justify-between">
+            <div className="mettle-card-interactive p-3.5 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] flex flex-col justify-between group shadow-2xs">
               <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
                 <span>Gold Yield</span>
-                <Coins className="h-3 w-3 text-[var(--gold)]" />
+                <Coins className="h-3.5 w-3.5 text-[var(--gold)] group-hover:scale-110 transition-transform duration-300" />
               </div>
               <div className="mt-2">
                 <span className="font-mono text-base sm:text-lg font-bold text-[var(--gold)]">
-                  +{earnedGoldToday}
+                  +<AnimatedNumber value={earnedGoldToday} />
                 </span>
                 <span className="text-[10px] font-mono text-[var(--text-muted)] block">
                   Treasury
@@ -438,54 +436,51 @@ export default function DashboardPage({
       </div>
 
       {/* 3. CARD 2: TODAY'S QUESTS — TACTICAL MISSIONS */}
-      <div className="mettle-card rounded-md p-5 sm:p-6 border border-[var(--border-strong)] bg-[var(--bg-surface)] text-[var(--text-primary)] space-y-4 shadow-xs">
+      <div className="rounded-2xl p-5 sm:p-6 border border-[var(--border-strong)] bg-[var(--bg-surface)] text-[var(--text-primary)] space-y-4 shadow-sm transition-all animate-fadeInUp delay-100">
         {/* Card Top Header & Filter Controls */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border)] pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border)] pb-3.5">
           <div className="flex items-center gap-2.5">
             <h2 className="font-display text-sm sm:text-base font-bold uppercase tracking-wider text-[var(--text-primary)]">
               TODAY'S QUESTS
             </h2>
             <div className="flex items-center gap-1.5">
-              <span className="px-2 py-0.5 rounded-xs bg-[var(--bg-primary)] border border-[var(--border)] font-mono text-[10px] font-bold text-[var(--accent)]">
-                {pendingCount} Active
+              <span className="px-2.5 py-0.5 rounded-full bg-[var(--bg-primary)] border border-[var(--border)] font-mono text-[10px] font-bold text-[var(--accent)]">
+                <AnimatedNumber value={pendingCount} /> Active
               </span>
               {completedCount > 0 && (
-                <span className="px-2 py-0.5 rounded-xs bg-[var(--bg-primary)] border border-[var(--border)] font-mono text-[10px] font-bold text-[var(--text-muted)]">
-                  {completedCount} Done
+                <span className="px-2.5 py-0.5 rounded-full bg-[var(--bg-primary)] border border-[var(--border)] font-mono text-[10px] font-bold text-[var(--text-muted)]">
+                  <AnimatedNumber value={completedCount} /> Done
                 </span>
               )}
             </div>
           </div>
 
           {/* Quick Filter Tabs */}
-          <div className="flex items-center gap-1 p-0.5 rounded-sm bg-[var(--bg-primary)] border border-[var(--border)]">
+          <div className="flex items-center gap-1 p-1 rounded-lg bg-[var(--bg-primary)] border border-[var(--border)]">
             <button
               onClick={() => setFilterView('all')}
-              className={`px-2.5 py-1 rounded-xs font-mono text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${
-                filterView === 'all'
-                  ? 'bg-[var(--bg-elevated)] text-[var(--text-primary)] shadow-2xs'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-              }`}
+              className={`px-3 py-1 rounded-md font-mono text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${filterView === 'all'
+                ? 'bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-xs border border-[var(--border-strong)]'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                }`}
             >
               All ({totalQuestsToday})
             </button>
             <button
               onClick={() => setFilterView('pending')}
-              className={`px-2.5 py-1 rounded-xs font-mono text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${
-                filterView === 'pending'
-                  ? 'bg-[var(--bg-elevated)] text-[var(--text-primary)] shadow-2xs'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-              }`}
+              className={`px-3 py-1 rounded-md font-mono text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${filterView === 'pending'
+                ? 'bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-xs border border-[var(--border-strong)]'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                }`}
             >
               Pending ({pendingCount})
             </button>
             <button
               onClick={() => setFilterView('completed')}
-              className={`px-2.5 py-1 rounded-xs font-mono text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${
-                filterView === 'completed'
-                  ? 'bg-[var(--bg-elevated)] text-[var(--text-primary)] shadow-2xs'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-              }`}
+              className={`px-3 py-1 rounded-md font-mono text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${filterView === 'completed'
+                ? 'bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-xs border border-[var(--border-strong)]'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                }`}
             >
               Done ({completedCount})
             </button>
@@ -501,17 +496,17 @@ export default function DashboardPage({
               return (
                 <div
                   key={task.id}
-                  className="group flex items-center justify-between p-3.5 sm:p-4 rounded-sm bg-[var(--bg-primary)] hover:bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-[var(--accent)] transition-all gap-3 shadow-2xs"
+                  className="group mettle-card-interactive flex items-center justify-between p-3.5 sm:p-4 rounded-xl bg-[var(--bg-primary)] hover:bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-[var(--accent)]/70 gap-3 shadow-2xs"
                 >
                   {/* Left: Custom Tactile Checkbox + Details */}
                   <div className="flex items-center gap-3.5 flex-1 min-w-0">
                     <button
                       onClick={() => handleComplete(task.id)}
-                      className="h-5 w-5 rounded-full border-2 border-[var(--border-strong)] hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] flex items-center justify-center shrink-0 transition-all cursor-pointer group-hover:scale-105"
+                      className="h-6 w-6 rounded-full border-2 border-[var(--border-strong)] hover:border-[var(--accent)] hover:bg-[var(--accent-soft)] flex items-center justify-center shrink-0 transition-all cursor-pointer active:scale-90 group-hover:scale-105 shadow-2xs"
                       title="Mark Complete & Claim XP"
                       aria-label="Complete Quest"
                     >
-                      <Check className="h-3 w-3 text-[var(--accent)] opacity-0 group-hover:opacity-80 transition-opacity stroke-[3]" />
+                      <Check className="h-3.5 w-3.5 text-[var(--accent)] opacity-0 group-hover:opacity-100 transition-opacity stroke-[3]" />
                     </button>
 
                     <div className="flex-1 min-w-0">
@@ -520,7 +515,7 @@ export default function DashboardPage({
                           {task.title}
                         </span>
                         <span
-                          className="inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded-xs text-[9px] font-mono font-bold uppercase tracking-wider border"
+                          className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase tracking-wider border"
                           style={{
                             borderColor: `${meta.color}40`,
                             backgroundColor: `${meta.color}15`,
@@ -546,29 +541,29 @@ export default function DashboardPage({
                   <div className="flex items-center gap-2.5 shrink-0">
                     {/* XP & Gold Chips */}
                     <div className="flex items-center gap-1.5 font-mono text-[11px]">
-                      <span className="px-2 py-0.5 rounded-xs bg-[var(--accent-soft)] border border-[var(--accent-border)] font-bold text-[var(--accent)]">
+                      <span className="px-2.5 py-0.5 rounded-full bg-[var(--accent-soft)] border border-[var(--accent-border)] font-bold text-[var(--accent)] shadow-2xs">
                         +{task.xp_reward || 30} XP
                       </span>
-                      <span className="hidden sm:inline-block px-2 py-0.5 rounded-xs bg-[var(--gold)]/10 border border-[var(--gold)]/30 font-bold text-[var(--gold)]">
+                      <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full bg-[var(--gold)]/10 border border-[var(--gold)]/30 font-bold text-[var(--gold)] shadow-2xs">
                         +{task.gold_reward || 10} G
                       </span>
                     </div>
 
                     {/* Action Buttons (Edit / Delete) */}
-                    <div className="flex items-center gap-1 opacity-80 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1 opacity-80 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-150">
                       <button
                         onClick={() => {
                           setSelectedQuest(task);
                           setIsCreateModalOpen(true);
                         }}
-                        className="p-1.5 rounded-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-colors cursor-pointer"
+                        className="p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] active:scale-90 transition-all cursor-pointer"
                         title="Edit Quest"
                       >
                         <Edit2 className="h-3.5 w-3.5" />
                       </button>
                       <button
                         onClick={() => handleDelete(task.id)}
-                        className="p-1.5 rounded-xs text-[var(--text-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger)]/10 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-md text-[var(--text-muted)] hover:text-rose-500 hover:bg-rose-500/10 active:scale-90 transition-all cursor-pointer"
                         title="Delete Quest"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -584,10 +579,10 @@ export default function DashboardPage({
             completedToday.map((done) => (
               <div
                 key={`done-${done.id}`}
-                className="flex items-center justify-between p-3 sm:p-3.5 rounded-sm bg-[var(--bg-primary)]/40 border border-[var(--border)] opacity-60 gap-3"
+                className="flex items-center justify-between p-3 sm:p-3.5 rounded-xl bg-[var(--bg-primary)]/40 border border-[var(--border)] opacity-65 gap-3 transition-opacity"
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="h-5 w-5 rounded-full bg-[var(--accent)] text-[var(--accent-text)] flex items-center justify-center shrink-0">
+                  <div className="h-5 w-5 rounded-full bg-[var(--accent)] text-[var(--accent-text)] flex items-center justify-center shrink-0 shadow-2xs">
                     <Check className="h-3 w-3 stroke-[3]" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -607,9 +602,9 @@ export default function DashboardPage({
 
           {/* Empty State */}
           {tasks.length === 0 && completedToday.length === 0 && (
-            <div className="p-8 text-center rounded-sm bg-[var(--bg-primary)] border border-dashed border-[var(--border-strong)] space-y-3">
-              <div className="h-10 w-10 mx-auto rounded-full bg-[var(--bg-surface)] border border-[var(--border)] flex items-center justify-center text-[var(--accent)]">
-                <Target className="h-5 w-5" />
+            <div className="p-8 text-center rounded-2xl bg-[var(--bg-primary)] border border-dashed border-[var(--border-strong)] space-y-3">
+              <div className="h-12 w-12 mx-auto rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] flex items-center justify-center text-[var(--accent)] shadow-xs animate-bounce" style={{ animationDuration: '3s' }}>
+                <Target className="h-6 w-6" />
               </div>
               <div className="space-y-1">
                 <p className="font-display text-sm font-bold text-[var(--text-primary)]">
@@ -624,9 +619,9 @@ export default function DashboardPage({
                   setSelectedQuest(null);
                   setIsCreateModalOpen(true);
                 }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-sm bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-text)] font-sans text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-xs"
+                className="inline-flex items-center gap-1.5 px-4.5 py-2.5 rounded-xl bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-[var(--accent-text)] font-sans text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-md shadow-[var(--accent)]/20 active:scale-95"
               >
-                <Plus className="h-3.5 w-3.5 stroke-[2.5]" />
+                <Plus className="h-4 w-4 stroke-[2.5]" />
                 <span>Create First Quest</span>
               </button>
             </div>
@@ -640,17 +635,17 @@ export default function DashboardPage({
               setSelectedQuest(null);
               setIsCreateModalOpen(true);
             }}
-            className="w-full py-2.5 rounded-sm border border-dashed border-[var(--border-strong)] hover:border-[var(--accent)] bg-[var(--bg-primary)] hover:bg-[var(--accent-soft)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-sans text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer pt-2 mt-1"
+            className="w-full py-2.5 rounded-xl border border-dashed border-[var(--border-strong)] hover:border-[var(--accent)] bg-[var(--bg-primary)] hover:bg-[var(--accent-soft)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-sans text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer pt-2 mt-1 active:scale-[0.99]"
           >
-            <Plus className="h-3.5 w-3.5 text-[var(--accent)] stroke-[2.5]" />
+            <Plus className="h-4 w-4 text-[var(--accent)] stroke-[2.5]" />
             <span>Add Another Quest</span>
           </button>
         )}
       </div>
 
       {/* 4. CARD 3: ATTRIBUTE MASTERY MATRIX */}
-      <div className="mettle-card rounded-md p-5 sm:p-6 border border-[var(--border-strong)] bg-[var(--bg-surface)] text-[var(--text-primary)] space-y-4 shadow-xs">
-        <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
+      <div className="rounded-2xl p-5 sm:p-6 border border-[var(--border-strong)] bg-[var(--bg-surface)] text-[var(--text-primary)] space-y-4 shadow-sm transition-all animate-fadeInUp delay-150">
+        <div className="flex items-center justify-between border-b border-[var(--border)] pb-3.5">
           <div>
             <h2 className="font-display text-sm sm:text-base font-bold uppercase tracking-wider text-[var(--text-primary)]">
               ATTRIBUTE MASTERY
@@ -677,7 +672,7 @@ export default function DashboardPage({
             return (
               <div
                 key={attr.id}
-                className="p-3.5 rounded-sm bg-[var(--bg-primary)] border border-[var(--border)] hover:border-[var(--border-strong)] transition-all space-y-2.5"
+                className="mettle-card-interactive p-4 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] space-y-2.5 shadow-2xs"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
@@ -685,7 +680,7 @@ export default function DashboardPage({
                       className="w-2.5 h-2.5 rounded-full shrink-0"
                       style={{
                         backgroundColor: attr.color,
-                        boxShadow: `0 0 6px ${attr.color}40`,
+                        boxShadow: `0 0 8px ${attr.color}60`,
                       }}
                     />
                     <div>
@@ -697,19 +692,20 @@ export default function DashboardPage({
                       </span>
                     </div>
                   </div>
-                  <span className="font-mono text-xs font-bold text-[var(--text-primary)] px-2 py-0.5 rounded-xs bg-[var(--bg-elevated)] border border-[var(--border)]">
-                    {attr.points} <span className="text-[9px] text-[var(--text-muted)]">pts</span>
+                  <span className="font-mono text-xs font-bold text-[var(--text-primary)] px-2 py-0.5 rounded-full bg-[var(--bg-elevated)] border border-[var(--border)] shadow-2xs">
+                    <AnimatedNumber value={attr.points} /> <span className="text-[9px] text-[var(--text-muted)]">pts</span>
                   </span>
                 </div>
 
                 {/* Micro Progress Bar */}
                 <div className="space-y-1">
-                  <div className="h-1.5 w-full rounded-full bg-[var(--bg-surface)] overflow-hidden border border-[var(--border)]">
+                  <div className="h-2 w-full rounded-full bg-[var(--bg-surface)] overflow-hidden border border-[var(--border)] p-[1px]">
                     <div
-                      className="h-full rounded-full transition-all duration-500 ease-out"
+                      className="h-full rounded-full transition-all duration-700 ease-out"
                       style={{
                         width: `${progressRatio}%`,
                         backgroundColor: attr.color,
+                        boxShadow: `0 0 8px ${attr.color}60`,
                       }}
                     />
                   </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
+import AnimatedNumber from './common/AnimatedNumber';
 import { LayoutDashboard, CheckSquare, Shield, Gift, User } from 'lucide-react';
 
 export default function Sidebar({ activeTab, setActiveTab }) {
@@ -16,10 +17,10 @@ export default function Sidebar({ activeTab, setActiveTab }) {
   ];
 
   return (
-    <aside className="hidden lg:flex flex-col w-[240px] shrink-0 border-r border-[var(--border)] bg-[var(--bg-primary)] p-5 min-h-[calc(100vh-3.5rem)] justify-between select-none">
+    <aside className="hidden lg:flex flex-col w-[240px] shrink-0 border-r border-[var(--border)] bg-[var(--bg-primary)] p-5 min-h-[calc(100vh-3.5rem)] justify-between select-none transition-colors">
       {/* Top Nav Links */}
-      <div className="space-y-1">
-        <div className="px-3 pb-3 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+      <div className="space-y-1.5">
+        <div className="px-3 pb-2.5 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
           Navigation
         </div>
         {navItems.map((item) => {
@@ -29,13 +30,13 @@ export default function Sidebar({ activeTab, setActiveTab }) {
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-sm font-sans text-xs tracking-wider font-semibold transition-all text-left ${
+              className={`group w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-sans text-xs tracking-wider font-semibold transition-all text-left cursor-pointer active:scale-95 ${
                 isActive
-                  ? 'bg-[var(--bg-elevated)] text-[var(--accent)] border-l-2 border-[var(--accent)] pl-2.5'
-                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]'
+                  ? 'bg-[var(--bg-elevated)] text-[var(--accent)] border-l-2 border-[var(--accent)] pl-2.5 shadow-sm shadow-[var(--accent)]/5'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] hover:translate-x-0.5'
               }`}
             >
-              <Icon className={`h-4 w-4 ${isActive ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]'}`} />
+              <Icon className={`h-4 w-4 transition-transform duration-200 group-hover:scale-110 ${isActive ? 'text-[var(--accent)]' : 'text-[var(--text-muted)] group-hover:text-[var(--text-primary)]'}`} />
               <span>{item.label}</span>
             </button>
           );
@@ -43,15 +44,15 @@ export default function Sidebar({ activeTab, setActiveTab }) {
       </div>
 
       {/* Bottom Character Summary */}
-      <div className="space-y-4 pt-4 border-t border-[var(--border)]">
+      <div className="space-y-3 pt-4 border-t border-[var(--border)]">
         {/* Character Quick State */}
-        <div className="px-3 py-2 rounded-sm bg-[var(--bg-surface)] border border-[var(--border)]">
+        <div className="px-3.5 py-2.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] shadow-xs transition-all hover:border-[var(--border-strong)]">
           <div className="flex items-baseline justify-between">
             <span className="font-display text-xs font-bold tracking-wider text-[var(--text-primary)]">
-              LEVEL {level}
+              LEVEL <AnimatedNumber value={level} />
             </span>
-            <span className="font-display text-xs font-bold text-[var(--accent)]">
-              {Number(totalXp).toLocaleString()} XP
+            <span className="font-display text-xs font-bold text-[var(--accent)] flex items-baseline gap-1">
+              <AnimatedNumber value={totalXp} /> <span>XP</span>
             </span>
           </div>
         </div>

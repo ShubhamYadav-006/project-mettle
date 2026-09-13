@@ -140,7 +140,13 @@ const loginUser = async ({ email, password }) => {
     `SELECT u.id, u.name, u.username, u.email, u.bio, u.avatar_url, u.password_hash, u.created_at,
             c.id AS character_id, c.title, c.level, c.total_xp, c.gold, c.mettle_score,
             a.strength, a.intellect, a.discipline, a.creativity, a.consistency,
-            s.current_streak, s.longest_streak, s.last_activity_date, COALESCE(s.freeze_count, 0) AS freeze_count
+            s.longest_streak, s.last_activity_date, COALESCE(s.freeze_count, 0) AS freeze_count,
+            CASE 
+              WHEN s.last_activity_date IS NULL THEN 0
+              WHEN s.last_activity_date >= CURRENT_DATE - 1 THEN s.current_streak
+              WHEN COALESCE(s.freeze_count, 0) > 0 THEN s.current_streak
+              ELSE 0
+            END AS current_streak
      FROM users u
      LEFT JOIN characters c ON c.user_id = u.id
      LEFT JOIN attributes a ON a.character_id = c.id
@@ -211,7 +217,13 @@ const getUserProfile = async (userId) => {
     `SELECT u.id, u.name, u.username, u.email, u.bio, u.avatar_url, u.created_at,
             c.id AS character_id, c.title, c.level, c.total_xp, c.gold, c.mettle_score,
             a.strength, a.intellect, a.discipline, a.creativity, a.consistency,
-            s.current_streak, s.longest_streak, s.last_activity_date, COALESCE(s.freeze_count, 0) AS freeze_count
+            s.longest_streak, s.last_activity_date, COALESCE(s.freeze_count, 0) AS freeze_count,
+            CASE 
+              WHEN s.last_activity_date IS NULL THEN 0
+              WHEN s.last_activity_date >= CURRENT_DATE - 1 THEN s.current_streak
+              WHEN COALESCE(s.freeze_count, 0) > 0 THEN s.current_streak
+              ELSE 0
+            END AS current_streak
      FROM users u
      LEFT JOIN characters c ON c.user_id = u.id
      LEFT JOIN attributes a ON a.character_id = c.id

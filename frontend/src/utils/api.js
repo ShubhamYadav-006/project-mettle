@@ -1,16 +1,24 @@
 import axios from 'axios';
 
-const rawApiUrl = (import.meta.env.VITE_API_URL || '').trim().replace(/\/+$/, '');
+// Support both standard VITE_API_URL and VITE_API_BASE_URL
+const rawApiUrl = (
+  import.meta.env.VITE_API_URL ||
+  import.meta.env.VITE_API_BASE_URL ||
+  ''
+).trim().replace(/\/+$/, '');
+
 const apiBase = rawApiUrl
   ? (rawApiUrl.endsWith('/api') ? rawApiUrl : `${rawApiUrl}/api`)
   : '/api';
 
 const api = axios.create({
   baseURL: apiBase,
-  withCredentials: true, // Send HTTP-only cookies automatically
+  withCredentials: true, // Send HTTP-only cookies across requests
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
   },
+  timeout: 20000,
 });
 
 // Request Interceptor: Attach Authorization Bearer token as fallback
@@ -43,9 +51,12 @@ api.interceptors.response.use(
 
     const message =
       (error.response && error.response.data && error.response.data.message) ||
+      (error.code === 'ERR_NETWORK' ? 'Network error: Unable to connect to server.' : null) ||
       error.message ||
       'An unexpected error occurred';
-    return Promise.reject(new Error(message));
+
+    error.message = message;
+    return Promise.reject(error);
   }
 );
 

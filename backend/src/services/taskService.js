@@ -291,6 +291,7 @@ const completeTask = async (userId, taskId, notes = '') => {
     // 5. Update Streak logic safely with Shield Support & zero timezone skew
     const streakQuery = await client.query(
       `SELECT s.*,
+              (CURRENT_DATE - s.last_activity_date) AS days_diff,
               (s.last_activity_date = CURRENT_DATE) AS is_today,
               (s.last_activity_date = CURRENT_DATE - 1) AS is_yesterday
        FROM streaks s 
@@ -305,28 +306,29 @@ const completeTask = async (userId, taskId, notes = '') => {
 
     if (streakQuery.rows.length > 0) {
       const s = streakQuery.rows[0];
-      freezeCount = s.freeze_count || 0;
-      const isToday = Boolean(s.is_today);
-      const isYesterday = Boolean(s.is_yesterday);
+      freezeCount = Number(s.freeze_count) || 0;
+      const daysDiff = s.days_diff !== null && s.days_diff !== undefined ? Number(s.days_diff) : null;
+      const isToday = Boolean(s.is_today) || daysDiff === 0;
+      const isYesterday = Boolean(s.is_yesterday) || daysDiff === 1;
 
       if (isToday) {
         // Already completed a quest today -> streak remains intact, never falsely increments on subsequent quests today
-        currentStreak = Math.max(1, s.current_streak || 1);
-        longestStreak = Math.max(s.longest_streak || 0, currentStreak);
+        currentStreak = Math.max(1, Number(s.current_streak) || 1);
+        longestStreak = Math.max(Number(s.longest_streak) || 0, currentStreak);
       } else if (isYesterday) {
-        // Consecutive day
-        currentStreak = (s.current_streak || 0) + 1;
-        longestStreak = Math.max(s.longest_streak || 0, currentStreak);
+        // Consecutive next day -> cleanly increment streak
+        currentStreak = (Number(s.current_streak) || 0) + 1;
+        longestStreak = Math.max(Number(s.longest_streak) || 0, currentStreak);
       } else if (s.last_activity_date && freezeCount > 0) {
-        // Missed day but protected by Streak Shield!
+        // Missed 1+ days but protected by Streak Freeze Shield!
         freezeCount = freezeCount - 1;
-        currentStreak = (s.current_streak || 0) + 1;
-        longestStreak = Math.max(s.longest_streak || 0, currentStreak);
+        currentStreak = (Number(s.current_streak) || 0) + 1;
+        longestStreak = Math.max(Number(s.longest_streak) || 0, currentStreak);
         shieldUsed = true;
       } else {
-        // First activity ever or streak reset
+        // First activity ever or streak reset after gap without shield
         currentStreak = 1;
-        longestStreak = Math.max(s.longest_streak || 0, 1);
+        longestStreak = Math.max(Number(s.longest_streak) || 0, 1);
       }
 
       await client.query(
@@ -334,6 +336,18 @@ const completeTask = async (userId, taskId, notes = '') => {
          SET current_streak = $1, longest_streak = $2, freeze_count = $3, last_activity_date = CURRENT_DATE, updated_at = CURRENT_TIMESTAMP
          WHERE user_id = $4`,
         [currentStreak, longestStreak, freezeCount, userId]
+      );
+    } else {
+      // First streak initialization on task completion
+      currentStreak = 1;
+      longestStreak = 1;
+      freezeCount = 0;
+      await client.query(
+        `INSERT INTO streaks (user_id, current_streak, longest_streak, freeze_count, last_activity_date)
+         VALUES ($1, 1, 1, 0, CURRENT_DATE)
+         ON CONFLICT (user_id) DO UPDATE
+         SET current_streak = 1, last_activity_date = CURRENT_DATE, updated_at = CURRENT_TIMESTAMP`,
+        [userId]
       );
     }
 

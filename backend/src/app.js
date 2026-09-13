@@ -22,30 +22,66 @@ app.use((req, res, next) => {
 });
 
 // CORS Configuration
-const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
-  .split(',')
-  .map((url) => url.trim().replace(/\/$/, ''))
-  .filter(Boolean);
+const rawAllowedOrigins = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.split(',').map((url) => url.trim().replace(/\/+$/, '')).filter(Boolean)
+  : [];
 
-app.use(cors({
+const defaultAllowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:5000',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:3000',
+];
+
+const allowedOrigins = Array.from(new Set([...rawAllowedOrigins, ...defaultAllowedOrigins]));
+
+const isOriginAllowed = (origin) => {
+  if (!origin) return true; // Allow non-browser requests (mobile, server-to-server, curl)
+  const normalizedOrigin = origin.trim().replace(/\/+$/, '');
+  if (allowedOrigins.includes(normalizedOrigin)) return true;
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    (normalizedOrigin.includes('localhost') || normalizedOrigin.includes('127.0.0.1'))
+  ) {
+    return true;
+  }
+  // Allow authorized hosting platforms (Vercel, Netlify, Render)
+  if (
+    normalizedOrigin.endsWith('.vercel.app') ||
+    normalizedOrigin.endsWith('.netlify.app') ||
+    normalizedOrigin.endsWith('.onrender.com')
+  ) {
+    return true;
+  }
+  return false;
+};
+
+const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (such as mobile apps, server-to-server, curl, Postman)
-    if (!origin) return callback(null, true);
-    const normalizedOrigin = origin.replace(/\/$/, '');
-    if (
-      allowedOrigins.includes(normalizedOrigin) ||
-      allowedOrigins.includes('*') ||
-      (process.env.NODE_ENV !== 'production' && (origin.includes('localhost') || origin.includes('127.0.0.1'))) ||
-      normalizedOrigin.endsWith('.vercel.app') ||
-      normalizedOrigin.endsWith('.netlify.app') ||
-      normalizedOrigin.endsWith('.onrender.com')
-    ) {
+    if (isOriginAllowed(origin)) {
       return callback(null, true);
     }
-    return callback(new Error(`CORS policy: origin ${origin} is not allowed by Access-Control-Allow-Origin.`));
+    // Deny CORS without throwing 500 error
+    return callback(null, false);
   },
   credentials: true,
-}));
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'Accept',
+    'Origin',
+    'Access-Control-Request-Method',
+    'Access-Control-Request-Headers',
+  ],
+  exposedHeaders: ['Set-Cookie'],
+  maxAge: 86400,
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // Payload Size Limiting (Allows safe Avatar Image Uploads)
 app.use(express.json({ limit: '5mb' }));

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import { notify } from '../components/common/ToastContainer';
 import {
   User,
   Mail,
@@ -120,6 +121,16 @@ export default function ProfilePage() {
     setShowPhotoOptions(false);
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isEditing) {
+        handleCloseEdit();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isEditing]);
+
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -224,6 +235,7 @@ export default function ProfilePage() {
         setProfileData(updated);
         updateUserProfile(updated);
         setSuccessMessage('Profile changes saved successfully.');
+        notify.success('Profile updated successfully!');
         setIsEditing(false);
 
         // Clear success message after 4 seconds
@@ -234,6 +246,7 @@ export default function ProfilePage() {
     } catch (err) {
       const msg = err.response?.data?.message || 'Failed to update profile. Please try again.';
       setError(msg);
+      notify.error(msg);
     } finally {
       setSaving(false);
     }
@@ -392,8 +405,8 @@ export default function ProfilePage() {
 
       {/* 3. Edit Profile Modal */}
       {isEditing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
-          <div className="relative w-full max-w-lg rounded-md mettle-panel border border-[var(--border-strong)] bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-xl overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+          <div className="relative w-full max-w-lg rounded-md mettle-panel border border-[var(--border-strong)] bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-2xl overflow-hidden animate-modal-pop">
             {/* Modal Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border)] bg-[var(--bg-elevated)]">
               <div>

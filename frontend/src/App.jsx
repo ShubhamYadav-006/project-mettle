@@ -11,7 +11,7 @@ import QuestsPage from './pages/QuestsPage';
 import CharacterPage from './pages/CharacterPage';
 import ShopPage from './pages/ShopPage';
 import ProfilePage from './pages/ProfilePage';
-import LevelUpModal from './components/LevelUpModal';
+import ToastContainer from './components/common/ToastContainer';
 import { Loader2 } from 'lucide-react';
 
 function AppContent() {
@@ -24,7 +24,7 @@ function AppContent() {
     return (
       <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col items-center justify-center text-[var(--text-primary)] gap-3">
         <Loader2 className="h-8 w-8 text-[var(--accent)] animate-spin" />
-        <p className="font-display text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)]">
+        <p className="font-display text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)] animate-pulse">
           Loading Mettle
         </p>
       </div>
@@ -64,30 +64,32 @@ function AppContent() {
         {/* Desktop Sidebar */}
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-        {/* Main Content Area */}
+        {/* Main Content Area with Smooth Page Transition */}
         <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto w-full min-w-0">
-          {activeTab === 'dashboard' && (
-            <DashboardPage
-              setActiveTab={setActiveTab}
-              onOpenCreateModal={() => setIsCreateModalOpen(true)}
-              isCreateModalOpen={isCreateModalOpen}
-              setIsCreateModalOpen={setIsCreateModalOpen}
-            />
-          )}
+          <div key={activeTab} className="animate-page-enter">
+            {activeTab === 'dashboard' && (
+              <DashboardPage
+                setActiveTab={setActiveTab}
+                onOpenCreateModal={() => setIsCreateModalOpen(true)}
+                isCreateModalOpen={isCreateModalOpen}
+                setIsCreateModalOpen={setIsCreateModalOpen}
+              />
+            )}
 
-          {activeTab === 'quests' && (
-            <QuestsPage
-              onOpenCreateModal={() => setIsCreateModalOpen(true)}
-              isCreateModalOpen={isCreateModalOpen}
-              setIsCreateModalOpen={setIsCreateModalOpen}
-            />
-          )}
+            {activeTab === 'quests' && (
+              <QuestsPage
+                onOpenCreateModal={() => setIsCreateModalOpen(true)}
+                isCreateModalOpen={isCreateModalOpen}
+                setIsCreateModalOpen={setIsCreateModalOpen}
+              />
+            )}
 
-          {activeTab === 'character' && <CharacterPage />}
+            {activeTab === 'character' && <CharacterPage />}
 
-          {activeTab === 'shop' && <ShopPage />}
+            {activeTab === 'shop' && <ShopPage />}
 
-          {activeTab === 'profile' && <ProfilePage />}
+            {activeTab === 'profile' && <ProfilePage />}
+          </div>
         </main>
       </div>
 
@@ -103,6 +105,9 @@ function AppContent() {
 
       {/* Level Up Celebration Modal */}
       <LevelUpModal data={levelUpData} onClose={() => setLevelUpData(null)} />
+
+      {/* Global Animated Toast Notifications */}
+      <ToastContainer />
     </div>
   );
 }
